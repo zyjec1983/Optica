@@ -1,0 +1,25 @@
+{
+    "name": "optica/sistema-gestion",
+    "description": "Sistema de Gestión para Óptica / Consultorio Optométrico",
+    "type": "project",
+    "license": "proprietary",
+    "require": {
+        "php": ">=8.2",
+        "phpoffice/phpword": "^1.2",
+        "smalot/pdfparser": "^2.5",
+        "dompdf/dompdf": "^3.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/",
+            "core\\": "core/"
+        },
+        "files": [
+            "app/Helpers/helpers.php"
+        ]
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true
+    }
+}

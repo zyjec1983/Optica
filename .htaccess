@@ -1,0 +1,14 @@
+# Sirve la aplicación desde public/ manteniendo la URL base /optica/
+# Redirige /optica/* -> /optica/public/*
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^$ public/index.php [L]
+    RewriteRule ^((?!public/).*)$ public/$1 [L,NC]
+</IfModule>
+
+# Parámetros de rendimiento y seguridad
+<IfModule mod_php.c>
+    php_value upload_max_filesize 50M
+    php_value post_max_size 50M
+</IfModule>
+Options -Indexes

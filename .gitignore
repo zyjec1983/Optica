@@ -1,0 +1,24 @@
+# Dependencias
+/vendor/
+
+# Configuración sensible
+.env
+CREDENTIALS.txt
+
+# Archivos de ejecución / subidas
+/storage/logs/*
+/storage/documents/*
+/storage/imports/*
+/storage/exports/*
+!/storage/**/.gitkeep
+/public/uploads/avatars/*
+!/public/uploads/avatars/.gitkeep
+
+# Logs y temporales
+*.log
+*.tmp
+storage/tmp_*.php
+
+# Sistema
+Thumbs.db
+Desktop.ini
