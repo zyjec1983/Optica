@@ -27,7 +27,8 @@ final class CitaRepository
                        p.identificacion AS paciente_identificacion,
                        p.telefono AS paciente_telefono
                 FROM citas c
-                INNER JOIN pacientes p ON p.id = c.paciente_id';
+                INNER JOIN pacientes p ON p.id = c.paciente_id AND p.deleted_at IS NULL
+                WHERE c.deleted_at IS NULL';
 
         $where = [];
         $params = [];
@@ -40,7 +41,7 @@ final class CitaRepository
             $params['estado'] = $estado;
         }
         if ($where !== []) {
-            $sql .= ' WHERE ' . implode(' AND ', $where);
+            $sql .= ' AND ' . implode(' AND ', $where);
         }
         $sql .= ' ORDER BY c.fecha ASC, c.hora ASC';
 
@@ -52,7 +53,7 @@ final class CitaRepository
     public function findById(int $id): ?Cita
     {
         $stmt = Database::connection()->prepare(
-            'SELECT * FROM citas WHERE id = :id LIMIT 1'
+            'SELECT * FROM citas WHERE id = :id AND deleted_at IS NULL LIMIT 1'
         );
         $stmt->execute(['id' => $id]);
         $row = $stmt->fetch();
@@ -103,15 +104,22 @@ final class CitaRepository
         $stmt->execute(['estado' => $estado, 'id' => $id]);
     }
 
-    public function delete(int $id): void
+    /**
+     * Soft-delete: solo marca `deleted_at`; la fila permanece en la base.
+     */
+    public function softDelete(int $id): void
     {
-        $stmt = Database::connection()->prepare('DELETE FROM citas WHERE id = :id');
+        $stmt = Database::connection()->prepare(
+            'UPDATE citas SET deleted_at = NOW() WHERE id = :id AND deleted_at IS NULL'
+        );
         $stmt->execute(['id' => $id]);
     }
 
     public function countByEstado(string $estado): int
     {
-        $stmt = Database::connection()->prepare('SELECT COUNT(*) FROM citas WHERE estado = :estado');
+        $stmt = Database::connection()->prepare(
+            'SELECT COUNT(*) FROM citas WHERE estado = :estado AND deleted_at IS NULL'
+        );
         $stmt->execute(['estado' => $estado]);
         return (int)$stmt->fetchColumn();
     }
@@ -122,8 +130,8 @@ final class CitaRepository
             'SELECT c.*,
                     CONCAT(p.primer_nombre, " ", p.segundo_nombre, " ", p.apellido_paterno, " ", p.apellido_materno) AS paciente_nombre
              FROM citas c
-             INNER JOIN pacientes p ON p.id = c.paciente_id
-             WHERE c.fecha = CURDATE() AND c.estado <> "cancelada"
+             INNER JOIN pacientes p ON p.id = c.paciente_id AND p.deleted_at IS NULL
+             WHERE c.fecha = CURDATE() AND c.estado <> "cancelada" AND c.deleted_at IS NULL
              ORDER BY c.hora ASC'
         );
         $stmt->execute();

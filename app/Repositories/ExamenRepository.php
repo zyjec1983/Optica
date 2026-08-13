@@ -34,11 +34,12 @@ final class ExamenRepository
                        CONCAT(p.primer_nombre, " ", p.segundo_nombre, " ", p.apellido_paterno, " ", p.apellido_materno) AS paciente_nombre,
                        p.identificacion AS paciente_identificacion
                 FROM examenes e
-                INNER JOIN pacientes p ON p.id = e.paciente_id';
+                INNER JOIN pacientes p ON p.id = e.paciente_id AND p.deleted_at IS NULL
+                WHERE e.deleted_at IS NULL';
 
         $params = [];
         if ($pacienteId !== null && $pacienteId > 0) {
-            $sql .= ' WHERE e.paciente_id = :paciente';
+            $sql .= ' AND e.paciente_id = :paciente';
             $params['paciente'] = $pacienteId;
         }
         $sql .= ' ORDER BY e.fecha_examen DESC, e.id DESC';
@@ -64,8 +65,8 @@ final class ExamenRepository
                     p.identificacion AS paciente_identificacion,
                     p.telefono AS paciente_telefono
              FROM examenes e
-             INNER JOIN pacientes p ON p.id = e.paciente_id
-             WHERE e.id = :id LIMIT 1'
+             INNER JOIN pacientes p ON p.id = e.paciente_id AND p.deleted_at IS NULL
+             WHERE e.id = :id AND e.deleted_at IS NULL LIMIT 1'
         );
         $stmt->execute(['id' => $id]);
         $row = $stmt->fetch();
@@ -110,15 +111,22 @@ final class ExamenRepository
         $stmt->execute($data);
     }
 
-    public function delete(int $id): void
+    /**
+     * Soft-delete: solo marca `deleted_at`; la fila permanece en la base.
+     */
+    public function softDelete(int $id): void
     {
-        $stmt = Database::connection()->prepare('DELETE FROM examenes WHERE id = :id');
+        $stmt = Database::connection()->prepare(
+            'UPDATE examenes SET deleted_at = NOW() WHERE id = :id AND deleted_at IS NULL'
+        );
         $stmt->execute(['id' => $id]);
     }
 
     public function count(): int
     {
-        return (int)Database::connection()->query('SELECT COUNT(*) FROM examenes')->fetchColumn();
+        return (int)Database::connection()
+            ->query('SELECT COUNT(*) FROM examenes WHERE deleted_at IS NULL')
+            ->fetchColumn();
     }
 
     /**

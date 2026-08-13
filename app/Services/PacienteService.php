@@ -112,7 +112,7 @@ final class PacienteService
 
     public function eliminar(int $id): void
     {
-        $this->pacientes->delete($id);
+        $this->pacientes->softDelete($id);
     }
 
     public function dashboardStats(): array

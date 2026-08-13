@@ -134,7 +134,7 @@ final class ExamenController extends Controller
             abort(403);
         }
         $this->servicio->eliminar($id);
-        session_flash('success', 'Examen eliminado.');
+        session_flash('success', 'Examen eliminado (soft delete): el registro queda oculto, la información no se borra del sistema.');
         redirect(app_url('/examenes'));
     }
 }

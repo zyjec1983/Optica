@@ -125,7 +125,7 @@ final class CitaController extends Controller
         }
 
         $this->servicio->eliminar($id);
-        session_flash('success', 'Cita eliminada.');
+        session_flash('success', 'Cita eliminada (soft delete): el registro queda oculto, la información no se borra del sistema.');
         redirect(app_url('/citas'));
     }
 }

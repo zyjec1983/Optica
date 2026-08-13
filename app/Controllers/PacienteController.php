@@ -139,7 +139,7 @@ final class PacienteController extends Controller
         }
         try {
             $this->servicio->eliminar($id);
-            session_flash('success', 'Paciente eliminado.');
+            session_flash('success', 'Paciente eliminado (soft delete): el registro queda oculto, la información no se borra del sistema.');
         } catch (RuntimeException $ex) {
             session_flash('error', $ex->getMessage());
         }

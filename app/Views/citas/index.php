@@ -111,7 +111,7 @@
                                     <i class="bi bi-pencil"></i>
                                 </a>
                                 <form method="post" action="<?= e(app_url('/citas/eliminar/' . $c['id'])) ?>" class="d-inline"
-                                      data-confirm="¿Eliminar esta cita de <?= e($c['paciente_nombre']) ?>? Esta acción no se puede deshacer.">
+                                      data-confirm="¿Eliminar la cita de <?= e($c['paciente_nombre']) ?>? Se marcará como eliminada; la información no se borra del sistema.">
                                     <?= csrf_field() ?>
                                     <button class="btn btn-sm btn-outline-danger" title="Eliminar"><i class="bi bi-trash"></i></button>
                                 </form>

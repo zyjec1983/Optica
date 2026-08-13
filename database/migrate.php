@@ -121,10 +121,25 @@ foreach ($queries as $sql) {
 }
 
 // ===== Columnas adicionales (idempotente para tablas ya existentes) =====
+// Soft-delete: cada entidad lleva `deleted_at`; "eliminar" solo marca la fecha
+// y la información nunca se borra físicamente de la base de datos.
 $columnas = [
     'users' => [
         'sexo ENUM("M","F") NOT NULL DEFAULT "M" AFTER role',
         'avatar VARCHAR(255) DEFAULT NULL AFTER sexo',
+        'deleted_at TIMESTAMP NULL DEFAULT NULL AFTER updated_at',
+    ],
+    'representantes' => [
+        'deleted_at TIMESTAMP NULL DEFAULT NULL AFTER created_at',
+    ],
+    'pacientes' => [
+        'deleted_at TIMESTAMP NULL DEFAULT NULL AFTER updated_at',
+    ],
+    'citas' => [
+        'deleted_at TIMESTAMP NULL DEFAULT NULL AFTER updated_at',
+    ],
+    'examenes' => [
+        'deleted_at TIMESTAMP NULL DEFAULT NULL AFTER updated_at',
     ],
 ];
 
@@ -136,6 +151,34 @@ foreach ($columnas as $tabla => $cols) {
             $pdo->exec("ALTER TABLE `{$tabla}` ADD COLUMN {$col}");
         }
     }
+}
+
+// ===== Índices para soft-delete =====
+// El índice único de identificación/correo impediría volver a registrar un
+// paciente o usuario que fue "eliminado" (soft delete). Se reemplaza por un
+// índice normal: la unicidad entre registros activos se valida en la aplicación
+// (findByIdentificacion / findByEmail excluyen a los eliminados).
+function indiceExiste(PDO $pdo, string $tabla, string $nombre): bool
+{
+    $stmt = $pdo->prepare(
+        'SELECT COUNT(*) FROM information_schema.STATISTICS
+         WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = :t AND INDEX_NAME = :i'
+    );
+    $stmt->execute(['t' => $tabla, 'i' => $nombre]);
+    return (int)$stmt->fetchColumn() > 0;
+}
+
+if (indiceExiste($pdo, 'pacientes', 'uq_identificacion')) {
+    $pdo->exec('ALTER TABLE pacientes DROP INDEX uq_identificacion');
+}
+if (!indiceExiste($pdo, 'pacientes', 'idx_identificacion')) {
+    $pdo->exec('ALTER TABLE pacientes ADD INDEX idx_identificacion (tipo_identificacion, identificacion)');
+}
+if (indiceExiste($pdo, 'users', 'email')) {
+    $pdo->exec('ALTER TABLE users DROP INDEX email');
+}
+if (!indiceExiste($pdo, 'users', 'idx_user_email')) {
+    $pdo->exec('ALTER TABLE users ADD INDEX idx_user_email (email)');
 }
 
 echo "Tablas creadas/verificadas correctamente.\n";

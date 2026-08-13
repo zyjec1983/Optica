@@ -37,7 +37,7 @@ final class RepresentanteRepository
     public function findByCedula(string $cedula): ?array
     {
         $stmt = Database::connection()->prepare(
-            'SELECT * FROM representantes WHERE cedula = :cedula LIMIT 1'
+            'SELECT * FROM representantes WHERE cedula = :cedula AND deleted_at IS NULL LIMIT 1'
         );
         $stmt->execute(['cedula' => $cedula]);
         $row = $stmt->fetch();
@@ -62,7 +62,7 @@ final class RepresentanteRepository
     public function all(): array
     {
         return Database::connection()
-            ->query('SELECT * FROM representantes ORDER BY nombres')
+            ->query('SELECT * FROM representantes WHERE deleted_at IS NULL ORDER BY nombres')
             ->fetchAll(PDO::FETCH_ASSOC);
     }
 }

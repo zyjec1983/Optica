@@ -187,8 +187,8 @@ final class UserController extends Controller
             redirect(app_url('/usuarios'));
         }
 
-        $this->users->delete($id);
-        session_flash('success', 'Usuario eliminado correctamente.');
+        $this->users->softDelete($id);
+        session_flash('success', 'Usuario eliminado (soft delete): el registro queda oculto, la información no se borra del sistema.');
         redirect(app_url('/usuarios'));
     }
 }

@@ -72,7 +72,7 @@
                                 <i class="bi bi-clock-history"></i>
                             </a>
                             <form method="post" action="<?= e(app_url('/pacientes/eliminar/' . $p['id'])) ?>" class="d-inline"
-                                  data-confirm="¿Eliminar al paciente <?= e($nombre) ?>? Se borrarán también sus citas y exámenes.">
+                                  data-confirm="¿Eliminar al paciente <?= e($nombre) ?>? Se marcará como eliminado; la información no se borra del sistema.">
                                 <?= csrf_field() ?>
                                 <button class="btn btn-sm btn-outline-danger" title="Eliminar"><i class="bi bi-trash"></i></button>
                             </form>

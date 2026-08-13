@@ -24,13 +24,15 @@ final class PacienteRepository
     {
         $sql = 'SELECT p.*, r.nombres AS rep_nombres, r.parentesco AS rep_parentesco
                 FROM pacientes p
-                LEFT JOIN representantes r ON r.id = p.representante_id';
+                LEFT JOIN representantes r ON r.id = p.representante_id
+                WHERE p.deleted_at IS NULL';
 
         $params = [];
         if ($search !== '') {
-            $sql .= ' WHERE p.identificacion LIKE :search
-                      OR CONCAT(p.primer_nombre, " ", p.segundo_nombre, " ", p.apellido_paterno, " ", p.apellido_materno) LIKE :search';
-            $params['search'] = '%' . $search . '%';
+            $sql .= ' AND (p.identificacion LIKE :search1
+                      OR CONCAT(p.primer_nombre, " ", p.segundo_nombre, " ", p.apellido_paterno, " ", p.apellido_materno) LIKE :search2)';
+            $params['search1'] = '%' . $search . '%';
+            $params['search2'] = '%' . $search . '%';
         }
         $sql .= ' ORDER BY p.id DESC';
 
@@ -42,7 +44,7 @@ final class PacienteRepository
     public function findById(int $id): ?Paciente
     {
         $stmt = Database::connection()->prepare(
-            'SELECT * FROM pacientes WHERE id = :id LIMIT 1'
+            'SELECT * FROM pacientes WHERE id = :id AND deleted_at IS NULL LIMIT 1'
         );
         $stmt->execute(['id' => $id]);
         $row = $stmt->fetch();
@@ -52,7 +54,7 @@ final class PacienteRepository
     public function findByIdentificacion(string $identificacion): ?Paciente
     {
         $stmt = Database::connection()->prepare(
-            'SELECT * FROM pacientes WHERE identificacion = :id LIMIT 1'
+            'SELECT * FROM pacientes WHERE identificacion = :id AND deleted_at IS NULL LIMIT 1'
         );
         $stmt->execute(['id' => $identificacion]);
         $row = $stmt->fetch();
@@ -106,21 +108,28 @@ final class PacienteRepository
         ]);
     }
 
-    public function delete(int $id): void
+    /**
+     * Soft-delete: solo marca `deleted_at`; la fila permanece en la base.
+     */
+    public function softDelete(int $id): void
     {
-        $stmt = Database::connection()->prepare('DELETE FROM pacientes WHERE id = :id');
+        $stmt = Database::connection()->prepare(
+            'UPDATE pacientes SET deleted_at = NOW() WHERE id = :id AND deleted_at IS NULL'
+        );
         $stmt->execute(['id' => $id]);
     }
 
     public function count(): int
     {
-        return (int)Database::connection()->query('SELECT COUNT(*) FROM pacientes')->fetchColumn();
+        return (int)Database::connection()
+            ->query('SELECT COUNT(*) FROM pacientes WHERE deleted_at IS NULL')
+            ->fetchColumn();
     }
 
     public function ultimos(int $limit = 5): array
     {
         $stmt = Database::connection()->prepare(
-            'SELECT p.* FROM pacientes p ORDER BY p.id DESC LIMIT :lim'
+            'SELECT p.* FROM pacientes p WHERE p.deleted_at IS NULL ORDER BY p.id DESC LIMIT :lim'
         );
         $stmt->bindValue(':lim', $limit, PDO::PARAM_INT);
         $stmt->execute();

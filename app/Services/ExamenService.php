@@ -77,7 +77,7 @@ final class ExamenService
 
     public function eliminar(int $id): void
     {
-        $this->examenes->delete($id);
+        $this->examenes->softDelete($id);
     }
 
     /**

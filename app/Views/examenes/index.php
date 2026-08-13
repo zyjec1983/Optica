@@ -78,7 +78,7 @@
                                 <a href="<?= e(app_url('/examenes/' . $ex['id'])) ?>" class="btn btn-sm btn-outline-primary" title="Ver"><i class="bi bi-eye"></i></a>
                                 <a href="<?= e(app_url('/examenes/editar/' . $ex['id'])) ?>" class="btn btn-sm btn-outline-secondary" title="Editar"><i class="bi bi-pencil"></i></a>
                                 <form method="post" action="<?= e(app_url('/examenes/eliminar/' . $ex['id'])) ?>" class="d-inline"
-                                      data-confirm="¿Eliminar este examen de <?= e($ex['paciente_nombre']) ?>? Esta acción no se puede deshacer.">
+                                      data-confirm="¿Eliminar el examen de <?= e($ex['paciente_nombre']) ?>? Se marcará como eliminado; la información no se borra del sistema.">
                                     <?= csrf_field() ?>
                                     <button class="btn btn-sm btn-outline-danger" title="Eliminar"><i class="bi bi-trash"></i></button>
                                 </form>

@@ -23,7 +23,7 @@ final class UserRepository
     public function findByEmail(string $email): ?User
     {
         $stmt = Database::connection()->prepare(
-            'SELECT * FROM users WHERE email = :email LIMIT 1'
+            'SELECT * FROM users WHERE email = :email AND deleted_at IS NULL LIMIT 1'
         );
         $stmt->execute(['email' => $email]);
         $row = $stmt->fetch();
@@ -49,7 +49,7 @@ final class UserRepository
 
     public function findById(int $id): ?User
     {
-        $stmt = Database::connection()->prepare('SELECT * FROM users WHERE id = :id LIMIT 1');
+        $stmt = Database::connection()->prepare('SELECT * FROM users WHERE id = :id AND deleted_at IS NULL LIMIT 1');
         $stmt->execute(['id' => $id]);
         $row = $stmt->fetch();
         return $row ? User::fromRow($row) : null;
@@ -82,16 +82,21 @@ final class UserRepository
         ]);
     }
 
-    public function delete(int $id): void
+    /**
+     * Soft-delete: solo marca `deleted_at`; la fila permanece en la base.
+     */
+    public function softDelete(int $id): void
     {
-        $stmt = Database::connection()->prepare('DELETE FROM users WHERE id = :id');
+        $stmt = Database::connection()->prepare(
+            'UPDATE users SET deleted_at = NOW() WHERE id = :id AND deleted_at IS NULL'
+        );
         $stmt->execute(['id' => $id]);
     }
 
     public function findAll(): array
     {
         return Database::connection()
-            ->query('SELECT * FROM users ORDER BY name')
+            ->query('SELECT * FROM users WHERE deleted_at IS NULL ORDER BY name')
             ->fetchAll(PDO::FETCH_ASSOC);
     }
 }

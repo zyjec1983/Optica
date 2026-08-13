@@ -88,7 +88,7 @@ final class CitaService
 
     public function eliminar(int $id): void
     {
-        $this->citas->delete($id);
+        $this->citas->softDelete($id);
     }
 
     private function validarYCompletar(Cita $c, array $data): Cita
