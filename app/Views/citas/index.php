@@ -100,7 +100,8 @@
                                         <input type="hidden" name="estado" value="atendida">
                                         <button class="btn btn-sm btn-outline-success" title="Marcar atendida"><i class="bi bi-check2-circle"></i></button>
                                     </form>
-                                    <form method="post" action="<?= e(app_url('/citas/estado/' . $c['id'])) ?>" class="d-inline" onsubmit="return confirm('¿Cancelar esta cita?');">
+                                    <form method="post" action="<?= e(app_url('/citas/estado/' . $c['id'])) ?>" class="d-inline"
+                                          data-confirm="¿Cancelar la cita de <?= e($c['paciente_nombre']) ?>?">
                                         <?= csrf_field() ?>
                                         <input type="hidden" name="estado" value="cancelada">
                                         <button class="btn btn-sm btn-outline-danger" title="Cancelar"><i class="bi bi-x-lg"></i></button>
@@ -109,7 +110,8 @@
                                 <a href="<?= e(app_url('/citas/editar/' . $c['id'])) ?>" class="btn btn-sm btn-outline-secondary" title="Editar">
                                     <i class="bi bi-pencil"></i>
                                 </a>
-                                <form method="post" action="<?= e(app_url('/citas/eliminar/' . $c['id'])) ?>" class="d-inline" onsubmit="return confirm('¿Eliminar esta cita?');">
+                                <form method="post" action="<?= e(app_url('/citas/eliminar/' . $c['id'])) ?>" class="d-inline"
+                                      data-confirm="¿Eliminar esta cita de <?= e($c['paciente_nombre']) ?>? Esta acción no se puede deshacer.">
                                     <?= csrf_field() ?>
                                     <button class="btn btn-sm btn-outline-danger" title="Eliminar"><i class="bi bi-trash"></i></button>
                                 </form>

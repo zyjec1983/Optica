@@ -48,7 +48,8 @@
                                 <i class="bi bi-pencil"></i> Editar
                             </a>
                             <?php if (($u['id'] ?? 0) !== (\App\Services\AuthService::user()['id'] ?? 0)): ?>
-                            <form method="post" action="<?= e(app_url('/usuarios/eliminar/' . $u['id'])) ?>" class="d-inline" onsubmit="return confirm('¿Eliminar este usuario?');">
+                            <form method="post" action="<?= e(app_url('/usuarios/eliminar/' . $u['id'])) ?>" class="d-inline"
+                                  data-confirm="¿Eliminar al usuario <?= e($u['name']) ?>? Esta acción no se puede deshacer.">
                                 <?= csrf_field() ?>
                                 <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
                             </form>

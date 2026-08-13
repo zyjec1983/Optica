@@ -147,18 +147,18 @@ $current = $_SERVER['REQUEST_URI'] ?? '/';
     </div>
 
     <?php
-    echo session_flash_html('success', 'success');
-    echo session_flash_html('error', 'danger');
-
+    // Mensajes de sesión (guardado correcto / errores) se muestran con SweetAlert2.
+    $flashSuccess = $_SESSION['_flash']['success'] ?? null;
+    $flashError = $_SESSION['_flash']['error'] ?? null;
+    $flashFieldErrors = [];
     if (!empty($_SESSION['_errors'])) {
         foreach ($_SESSION['_errors'] as $field => $msgs) {
             foreach ($msgs as $m) {
-                echo '<div class="alert alert-danger alert-dismissible fade show" role="alert">'
-                    . e($m) . '<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>';
+                $flashFieldErrors[] = $m;
             }
         }
-        unset($_SESSION['_errors']);
     }
+    unset($_SESSION['_flash'], $_SESSION['_errors']);
 
     if (!empty($_content)) {
         $file = base_path('app/Views/' . $_content . '.php');
@@ -172,6 +172,7 @@ $current = $_SERVER['REQUEST_URI'] ?? '/';
     ?>
 </main>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <!-- Modal Perfil (subir foto) -->
@@ -248,6 +249,62 @@ document.getElementById('perfilFile')?.addEventListener('change', function () {
     reader.onload = e => document.getElementById('perfilPreview').src = e.target.result;
     reader.readAsDataURL(file);
 });
+</script>
+<script>
+    (function () {
+        // Escapa texto para mostrarlo de forma segura en ventanas SweetAlert2
+        // (el título se renderiza como HTML; se previene cualquier XSS).
+        function esc(s) {
+            return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        // Notificación al guardar (éxito) o ante errores de la operación.
+        const success = <?= json_encode($flashSuccess) ?>;
+        const error = <?= json_encode($flashError) ?>;
+        if (success) {
+            Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: esc(success),
+                showConfirmButton: false, timer: 3000, timerProgressBar: true });
+        }
+        if (error) {
+            Swal.fire({ toast: true, position: 'top-end', icon: 'error', title: esc(error),
+                showConfirmButton: false, timer: 4500, timerProgressBar: true });
+        }
+
+        // Errores de validación de formularios.
+        const fieldErrors = <?= json_encode($flashFieldErrors) ?>;
+        if (fieldErrors.length > 0) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Revise el formulario',
+                html: '<ul class="text-start ps-3 mb-0">'
+                    + fieldErrors.map(function (m) { return '<li>' + esc(m) + '</li>'; }).join('')
+                    + '</ul>'
+            });
+        }
+
+        // Confirmaciones: cualquier formulario con data-confirm pide confirmación.
+        document.addEventListener('submit', function (e) {
+            const form = e.target;
+            const msg = form.getAttribute('data-confirm');
+            if (!msg) return;
+            e.preventDefault();
+            Swal.fire({
+                title: '¿Está seguro?',
+                text: msg,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Sí, continuar',
+                cancelButtonText: 'Cancelar'
+            }).then(function (result) {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        });
+    })();
 </script>
 </body>
 </html>

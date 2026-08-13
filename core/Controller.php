@@ -82,7 +82,12 @@ abstract class Controller
     {
         $_SESSION['_errors'] = $errors;
         $_SESSION['_old'] = $_POST;
-        $referer = $_SERVER['HTTP_REFERER'] ?? app_url();
+        // Solo se regresa al referer si es de este mismo sitio (evita open redirect).
+        $base = rtrim(app_url(), '/');
+        $referer = (string)($_SERVER['HTTP_REFERER'] ?? '');
+        if ($referer === '' || !str_starts_with($referer, $base)) {
+            $referer = app_url('/');
+        }
         redirect($referer);
     }
 

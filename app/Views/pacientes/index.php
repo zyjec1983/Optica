@@ -71,10 +71,11 @@
                             <a class="btn btn-sm btn-outline-info" href="<?= e(app_url('/examenes?paciente_id=' . $p['id'])) ?>" title="Historial de exámenes">
                                 <i class="bi bi-clock-history"></i>
                             </a>
-                            <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal"
-                                    data-id="<?= (int)$p['id'] ?>" data-nombre="<?= e($nombre) ?>">
-                                <i class="bi bi-trash"></i>
-                            </button>
+                            <form method="post" action="<?= e(app_url('/pacientes/eliminar/' . $p['id'])) ?>" class="d-inline"
+                                  data-confirm="¿Eliminar al paciente <?= e($nombre) ?>? Se borrarán también sus citas y exámenes.">
+                                <?= csrf_field() ?>
+                                <button class="btn btn-sm btn-outline-danger" title="Eliminar"><i class="bi bi-trash"></i></button>
+                            </form>
                         </td>
                     </tr>
                 <?php endforeach; ?>
@@ -87,35 +88,3 @@
         </table>
     </div>
 </div>
-
-<?php if (count($pacientes) > 0): ?>
-<!-- Modal eliminar -->
-<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title fw-bold">Eliminar paciente</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                ¿Seguro que desea eliminar a <strong id="deleteNombre"></strong>?
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <form method="post" id="deleteForm" action="">
-                    <?= csrf_field() ?>
-                    <button type="submit" class="btn btn-danger">Eliminar</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-<script>
-    const deleteModal = document.getElementById('deleteModal');
-    deleteModal.addEventListener('show.bs.modal', function (event) {
-        const btn = event.relatedTarget;
-        document.getElementById('deleteNombre').textContent = btn.dataset.nombre;
-        document.getElementById('deleteForm').action = '<?= e(app_url('/pacientes/eliminar')) ?>/' + btn.dataset.id;
-    });
-</script>
-<?php endif; ?>
