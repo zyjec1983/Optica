@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * ==================================================================
+ *  ARCHIVO: database/migrate.php
+ *  PROYECTO: Sistema de Gestión para Óptica / Consultorio Optométrico
+ *  DESCRIPCIÓN: Script de base de datos: migrate.
+ * ==================================================================
+ */
+
+
+
 declare(strict_types=1);
 
 /**
@@ -75,6 +85,33 @@ $queries = [
         CONSTRAINT fk_cita_paciente FOREIGN KEY (paciente_id)
             REFERENCES pacientes (id) ON DELETE CASCADE,
         CONSTRAINT fk_cita_usuario FOREIGN KEY (user_id)
+            REFERENCES users (id) ON DELETE SET NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4',
+    // ===== examenes visuales =====
+    'CREATE TABLE IF NOT EXISTS examenes (
+        id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        paciente_id INT UNSIGNED NOT NULL,
+        user_id INT UNSIGNED NULL,
+        fecha_examen DATE NOT NULL,
+        od_esfera DECIMAL(5,2) NULL,
+        od_cilindro DECIMAL(5,2) NULL,
+        od_eje SMALLINT UNSIGNED NULL,
+        os_esfera DECIMAL(5,2) NULL,
+        os_cilindro DECIMAL(5,2) NULL,
+        os_eje SMALLINT UNSIGNED NULL,
+        dp DECIMAL(4,1) NULL,
+        add_value DECIMAL(4,2) NULL,
+        diagnostico TEXT,
+        observaciones TEXT,
+        firma LONGTEXT,
+        firma_representante TINYINT(1) NOT NULL DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        KEY idx_examen_paciente (paciente_id),
+        KEY idx_examen_fecha (fecha_examen),
+        CONSTRAINT fk_examen_paciente FOREIGN KEY (paciente_id)
+            REFERENCES pacientes (id) ON DELETE CASCADE,
+        CONSTRAINT fk_examen_usuario FOREIGN KEY (user_id)
             REFERENCES users (id) ON DELETE SET NULL
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4',
 ];

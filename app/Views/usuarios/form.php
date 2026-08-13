@@ -1,4 +1,14 @@
-<?php /** @var \App\Models\User|null $usuario */ /** @var array $roles */ ?>
+<?php
+
+/**
+ * ==================================================================
+ *  ARCHIVO: app/Views/usuarios/form.php
+ *  PROYECTO: Sistema de Gestión para Óptica / Consultorio Optométrico
+ *  DESCRIPCIÓN: Vista: presentación HTML responsiva (Bootstrap 5).
+ * ==================================================================
+ */
+
+ /** @var \App\Models\User|null $usuario */ /** @var array $roles */ ?>
 <?php
 $isEdit = $usuario !== null;
 $title = $isEdit ? 'Editar usuario' : 'Nuevo usuario';

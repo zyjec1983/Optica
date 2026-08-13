@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * ==================================================================
+ *  ARCHIVO: app/Controllers/PerfilController.php
+ *  PROYECTO: Sistema de Gestión para Óptica / Consultorio Optométrico
+ *  DESCRIPCIÓN: Controlador del perfil de usuario (avatar y contraseña).
+ * ==================================================================
+ */
+
+
+
 declare(strict_types=1);
 
 namespace App\Controllers;

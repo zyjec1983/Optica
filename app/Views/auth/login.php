@@ -1,4 +1,14 @@
-<?php $appName = env('APP_NAME', 'Opticenter'); ?>
+<?php
+
+/**
+ * ==================================================================
+ *  ARCHIVO: app/Views/auth/login.php
+ *  PROYECTO: Sistema de Gestión para Óptica / Consultorio Optométrico
+ *  DESCRIPCIÓN: Vista: presentación HTML responsiva (Bootstrap 5).
+ * ==================================================================
+ */
+
+ $appName = env('APP_NAME', 'Opticenter'); ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>

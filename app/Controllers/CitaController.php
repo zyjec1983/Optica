@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * ==================================================================
+ *  ARCHIVO: app/Controllers/CitaController.php
+ *  PROYECTO: Sistema de Gestión para Óptica / Consultorio Optométrico
+ *  DESCRIPCIÓN: Controlador del módulo de citas (agenda de atenciones).
+ * ==================================================================
+ */
+
+
+
 declare(strict_types=1);
 
 namespace App\Controllers;

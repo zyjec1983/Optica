@@ -1,4 +1,14 @@
 <?php
+
+/**
+ * ==================================================================
+ *  ARCHIVO: app/Views/citas/form.php
+ *  PROYECTO: Sistema de Gestión para Óptica / Consultorio Optométrico
+ *  DESCRIPCIÓN: Vista: presentación HTML responsiva (Bootstrap 5).
+ * ==================================================================
+ */
+
+
 /** @var \App\Models\Cita $cita */
 /** @var bool $esEdicion */
 /** @var array $pacientes */

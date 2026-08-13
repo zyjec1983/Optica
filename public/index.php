@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * ==================================================================
+ *  ARCHIVO: public/index.php
+ *  PROYECTO: Sistema de Gestión para Óptica / Consultorio Optométrico
+ *  DESCRIPCIÓN: Punto de entrada pública (Front Controller).
+ * ==================================================================
+ */
+
+
+
 declare(strict_types=1);
 
 require dirname(__DIR__) . '/vendor/autoload.php';

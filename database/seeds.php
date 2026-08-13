@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * ==================================================================
+ *  ARCHIVO: database/seeds.php
+ *  PROYECTO: Sistema de Gestión para Óptica / Consultorio Optométrico
+ *  DESCRIPCIÓN: Script de base de datos: seeds.
+ * ==================================================================
+ */
+
+
+
 declare(strict_types=1);
 
 /**

@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * ==================================================================
+ *  ARCHIVO: app/Services/PacienteService.php
+ *  PROYECTO: Sistema de Gestión para Óptica / Consultorio Optométrico
+ *  DESCRIPCIÓN: Casos de uso y reglas de aplicación de PacienteService.
+ * ==================================================================
+ */
+
+
+
 declare(strict_types=1);
 
 namespace App\Services;

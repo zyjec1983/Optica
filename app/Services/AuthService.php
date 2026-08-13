@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * ==================================================================
+ *  ARCHIVO: app/Services/AuthService.php
+ *  PROYECTO: Sistema de Gestión para Óptica / Consultorio Optométrico
+ *  DESCRIPCIÓN: Casos de uso y reglas de aplicación de AuthService.
+ * ==================================================================
+ */
+
+
+
 declare(strict_types=1);
 
 namespace App\Services;

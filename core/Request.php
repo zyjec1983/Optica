@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * ==================================================================
+ *  ARCHIVO: core/Request.php
+ *  PROYECTO: Sistema de Gestión para Óptica / Consultorio Optométrico
+ *  DESCRIPCIÓN: Núcleo del framework propio: Request.
+ * ==================================================================
+ */
+
+
+
 declare(strict_types=1);
 
 namespace core;

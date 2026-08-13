@@ -1,11 +1,28 @@
 <?php
 
+/**
+ * ==================================================================
+ *  ARCHIVO: core/Database.php
+ *  PROYECTO: Sistema de Gestión para Óptica / Consultorio Optométrico
+ *  DESCRIPCIÓN: Núcleo del framework propio: Database.
+ * ==================================================================
+ */
+
+
+
 declare(strict_types=1);
 
 namespace core;
 
 use PDO;
 
+/**
+ * Conexión única (singleton) a MySQL mediante PDO.
+ *
+ * Los datos de conexión provienen de config/app.php (que lee el .env),
+ * por lo que al cambiar el .env la conexión usa los nuevos valores sin
+ * modificar código.
+ */
 final class Database
 {
     private static ?PDO $connection = null;

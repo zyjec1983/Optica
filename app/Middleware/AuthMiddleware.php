@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * ==================================================================
+ *  ARCHIVO: app/Middleware/AuthMiddleware.php
+ *  PROYECTO: Sistema de Gestión para Óptica / Consultorio Optométrico
+ *  DESCRIPCIÓN: Middleware de AuthMiddleware.
+ * ==================================================================
+ */
+
+
+
 declare(strict_types=1);
 
 namespace App\Middleware;

@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * ==================================================================
+ *  ARCHIVO: core/Controller.php
+ *  PROYECTO: Sistema de Gestión para Óptica / Consultorio Optométrico
+ *  DESCRIPCIÓN: Núcleo del framework propio: Controller.
+ * ==================================================================
+ */
+
+
+
 declare(strict_types=1);
 
 namespace core;

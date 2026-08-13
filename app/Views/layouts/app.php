@@ -1,4 +1,14 @@
 <?php
+
+/**
+ * ==================================================================
+ *  ARCHIVO: app/Views/layouts/app.php
+ *  PROYECTO: Sistema de Gestión para Óptica / Consultorio Optométrico
+ *  DESCRIPCIÓN: Vista (layout): estructura base de las páginas autenticadas.
+ * ==================================================================
+ */
+
+
 /** @var string $_content Vista interna a renderizar */
 /** @var array $_data Datos de la vista interna */
 $user = \App\Services\AuthService::user();
@@ -71,6 +81,10 @@ $current = $_SERVER['REQUEST_URI'] ?? '/';
         <div class="nav-section">Pacientes</div>
         <a href="<?= e(app_url('/pacientes')) ?>" class="nav-link-custom <?= str_starts_with($current, '/pacientes') ? 'active' : '' ?>">
             <i class="bi bi-people"></i> Pacientes
+        </a>
+        <div class="nav-section">Clínica</div>
+        <a href="<?= e(app_url('/examenes')) ?>" class="nav-link-custom <?= str_starts_with($current, '/examenes') ? 'active' : '' ?>">
+            <i class="bi bi-eyedropper"></i> Exámenes
         </a>
         <div class="nav-section">Agenda</div>
         <a href="<?= e(app_url('/citas')) ?>" class="nav-link-custom <?= str_starts_with($current, '/citas') ? 'active' : '' ?>">

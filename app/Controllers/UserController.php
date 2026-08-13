@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * ==================================================================
+ *  ARCHIVO: app/Controllers/UserController.php
+ *  PROYECTO: Sistema de Gestión para Óptica / Consultorio Optométrico
+ *  DESCRIPCIÓN: Controlador del módulo de usuarios (solo administrador).
+ * ==================================================================
+ */
+
+
+
 declare(strict_types=1);
 
 namespace App\Controllers;

@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * ==================================================================
+ *  ARCHIVO: app/Models/Cita.php
+ *  PROYECTO: Sistema de Gestión para Óptica / Consultorio Optométrico
+ *  DESCRIPCIÓN: Modelo / entidad de dominio Cita (sin SQL).
+ * ==================================================================
+ */
+
+
+
 declare(strict_types=1);
 
 namespace App\Models;

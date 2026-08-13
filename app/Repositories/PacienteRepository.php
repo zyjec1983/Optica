@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * ==================================================================
+ *  ARCHIVO: app/Repositories/PacienteRepository.php
+ *  PROYECTO: Sistema de Gestión para Óptica / Consultorio Optométrico
+ *  DESCRIPCIÓN: Acceso y persistencia de PacienteRepository en MySQL (PDO).
+ * ==================================================================
+ */
+
+
+
 declare(strict_types=1);
 
 namespace App\Repositories;

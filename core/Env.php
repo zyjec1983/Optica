@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * ==================================================================
+ *  ARCHIVO: core/Env.php
+ *  PROYECTO: Sistema de Gestión para Óptica / Consultorio Optométrico
+ *  DESCRIPCIÓN: Núcleo del framework propio: Env.
+ * ==================================================================
+ */
+
+
+
 declare(strict_types=1);
 
 namespace core;

@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * ==================================================================
+ *  ARCHIVO: app/Controllers/AuthController.php
+ *  PROYECTO: Sistema de Gestión para Óptica / Consultorio Optométrico
+ *  DESCRIPCIÓN: Controlador de autenticación (login y logout).
+ * ==================================================================
+ */
+
+
+
 declare(strict_types=1);
 
 namespace App\Controllers;

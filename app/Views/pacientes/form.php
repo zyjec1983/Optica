@@ -1,4 +1,14 @@
 <?php
+
+/**
+ * ==================================================================
+ *  ARCHIVO: app/Views/pacientes/form.php
+ *  PROYECTO: Sistema de Gestión para Óptica / Consultorio Optométrico
+ *  DESCRIPCIÓN: Vista: presentación HTML responsiva (Bootstrap 5).
+ * ==================================================================
+ */
+
+
 /** @var \App\Models\Paciente $paciente */
 /** @var bool $esEdicion */
 $pv = fn(string $key, string $fallback = '') => old($key, $fallback);

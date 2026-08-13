@@ -1,4 +1,14 @@
-<?php /** @var array $pacientes */ /** @var string $busqueda */ ?>
+<?php
+
+/**
+ * ==================================================================
+ *  ARCHIVO: app/Views/pacientes/index.php
+ *  PROYECTO: Sistema de Gestión para Óptica / Consultorio Optométrico
+ *  DESCRIPCIÓN: Vista: presentación HTML responsiva (Bootstrap 5).
+ * ==================================================================
+ */
+
+ /** @var array $pacientes */ /** @var string $busqueda */ ?>
 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
     <h2 class="fw-bold"><i class="bi bi-people-fill me-2"></i>Pacientes</h2>
     <a href="<?= e(app_url('/pacientes/nuevo')) ?>" class="btn btn-primary">
@@ -55,8 +65,11 @@
                             <?php endif; ?>
                         </td>
                         <td class="text-nowrap">
-                            <a class="btn btn-sm btn-outline-primary" href="<?= e(app_url('/pacientes/editar/' . $p['id'])) ?>">
+                            <a class="btn btn-sm btn-outline-primary" href="<?= e(app_url('/pacientes/editar/' . $p['id'])) ?>" title="Editar">
                                 <i class="bi bi-pencil"></i>
+                            </a>
+                            <a class="btn btn-sm btn-outline-info" href="<?= e(app_url('/examenes?paciente_id=' . $p['id'])) ?>" title="Historial de exámenes">
+                                <i class="bi bi-clock-history"></i>
                             </a>
                             <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal"
                                     data-id="<?= (int)$p['id'] ?>" data-nombre="<?= e($nombre) ?>">

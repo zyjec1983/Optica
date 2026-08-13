@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * ==================================================================
+ *  ARCHIVO: app/Repositories/RepresentanteRepository.php
+ *  PROYECTO: Sistema de Gestión para Óptica / Consultorio Optométrico
+ *  DESCRIPCIÓN: Acceso y persistencia de RepresentanteRepository en MySQL (PDO).
+ * ==================================================================
+ */
+
+
+
 declare(strict_types=1);
 
 namespace App\Repositories;

@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * ==================================================================
+ *  ARCHIVO: app/Helpers/helpers.php
+ *  PROYECTO: Sistema de Gestión para Óptica / Consultorio Optométrico
+ *  DESCRIPCIÓN: Helpers / funciones globales reutilizables.
+ * ==================================================================
+ */
+
+
+
 declare(strict_types=1);
 
 use core\Database;

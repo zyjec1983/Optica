@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * ==================================================================
+ *  ARCHIVO: core/Response.php
+ *  PROYECTO: Sistema de Gestión para Óptica / Consultorio Optométrico
+ *  DESCRIPCIÓN: Núcleo del framework propio: Response.
+ * ==================================================================
+ */
+
+
+
 declare(strict_types=1);
 
 namespace core;

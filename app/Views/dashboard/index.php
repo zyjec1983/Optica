@@ -1,4 +1,14 @@
-<?php /** @var int $total_pacientes */ ?>
+<?php
+
+/**
+ * ==================================================================
+ *  ARCHIVO: app/Views/dashboard/index.php
+ *  PROYECTO: Sistema de Gestión para Óptica / Consultorio Optométrico
+ *  DESCRIPCIÓN: Vista: presentación HTML responsiva (Bootstrap 5).
+ * ==================================================================
+ */
+
+ /** @var int $total_pacientes */ ?>
 <h2 class="fw-bold mb-4"><i class="bi bi-grid-fill text-primary me-2"></i>Panel de Control</h2>
 
 <div class="row g-4 mb-4">

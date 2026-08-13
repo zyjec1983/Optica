@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * ==================================================================
+ *  ARCHIVO: app/Middleware/RoleMiddleware.php
+ *  PROYECTO: Sistema de Gestión para Óptica / Consultorio Optométrico
+ *  DESCRIPCIÓN: Middleware de RoleMiddleware.
+ * ==================================================================
+ */
+
+
+
 declare(strict_types=1);
 
 namespace App\Middleware;

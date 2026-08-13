@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * ==================================================================
+ *  ARCHIVO: app/Models/User.php
+ *  PROYECTO: Sistema de Gestión para Óptica / Consultorio Optométrico
+ *  DESCRIPCIÓN: Modelo / entidad de dominio User (sin SQL).
+ * ==================================================================
+ */
+
+
+
 declare(strict_types=1);
 
 namespace App\Models;

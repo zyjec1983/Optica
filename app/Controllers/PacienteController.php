@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * ==================================================================
+ *  ARCHIVO: app/Controllers/PacienteController.php
+ *  PROYECTO: Sistema de Gestión para Óptica / Consultorio Optométrico
+ *  DESCRIPCIÓN: Controlador del módulo de pacientes.
+ * ==================================================================
+ */
+
+
+
 declare(strict_types=1);
 
 namespace App\Controllers;
