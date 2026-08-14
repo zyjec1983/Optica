@@ -17,9 +17,15 @@
 </div>
 
 <div class="card card-custom p-4">
-    <form method="get" action="<?= e(app_url('/pacientes')) ?>" class="row g-2 mb-3">
+    <form method="get" action="<?= e(app_url('/pacientes')) ?>" class="row g-2 mb-3" id="busquedaForm">
         <div class="col-md-9">
-            <input type="text" name="q" class="form-control" placeholder="Buscar por nombre o cédula..." value="<?= e($busqueda) ?>">
+            <div class="position-relative">
+                <input type="text" name="q" id="busquedaPaciente" class="form-control"
+                       placeholder="Buscar por nombre, cédula o teléfono..." value="<?= e($busqueda) ?>"
+                       autocomplete="off" minlength="2">
+                <div class="list-group position-absolute w-100 shadow" id="coincidenciasLista" style="z-index:1030; display:none;"></div>
+            </div>
+            <div class="form-text" id="coincidenciasInfo"></div>
         </div>
         <div class="col-md-3 d-grid">
             <button class="btn btn-secondary"><i class="bi bi-search"></i> Filtrar</button>
@@ -88,3 +94,69 @@
         </table>
     </div>
 </div>
+
+<script>
+    (function () {
+        const input = document.getElementById('busquedaPaciente');
+        const lista = document.getElementById('coincidenciasLista');
+        const info = document.getElementById('coincidenciasInfo');
+        const form = document.getElementById('busquedaForm');
+        const buscarUrl = <?= json_encode(app_url('/pacientes/buscar')) ?>;
+        let timeout = null;
+
+        function nombre(p) {
+            return [p.primer_nombre, p.segundo_nombre, p.apellido_paterno, p.apellido_materno]
+                .filter(Boolean).join(' ').trim();
+        }
+
+        function ocultar() {
+            lista.style.display = 'none';
+            lista.innerHTML = '';
+        }
+
+        input.addEventListener('input', function () {
+            clearTimeout(timeout);
+            const q = input.value.trim();
+            if (q.length < 2) { ocultar(); info.textContent = ''; return; }
+            timeout = setTimeout(function () {
+                fetch(buscarUrl + '?q=' + encodeURIComponent(q), { headers: { 'Accept': 'application/json' } })
+                    .then(function (r) { return r.json(); })
+                    .then(function (data) {
+                        ocultar();
+                        if (data.length === 0) {
+                            info.textContent = 'Sin coincidencias para "' + q + '".';
+                            return;
+                        }
+                        info.textContent = data.length + (data.length === 1 ? ' coincidencia encontrada' : ' coincidencias encontradas');
+                        data.forEach(function (p) {
+                            const item = document.createElement('button');
+                            item.type = 'button';
+                            item.className = 'list-group-item list-group-item-action text-start';
+                            const nombreEl = document.createElement('div');
+                            nombreEl.className = 'fw-semibold';
+                            nombreEl.textContent = nombre(p);
+                            const detalle = document.createElement('small');
+                            detalle.className = 'text-muted';
+                            detalle.textContent = (p.identificacion || '') + (p.telefono ? ' · ' + p.telefono : '');
+                            item.appendChild(nombreEl);
+                            item.appendChild(detalle);
+                            item.addEventListener('click', function () {
+                                input.value = nombre(p) + ' ' + (p.identificacion || '');
+                                form.submit();
+                            });
+                            lista.appendChild(item);
+                        });
+                        lista.style.display = 'block';
+                    })
+                    .catch(function () { ocultar(); });
+            }, 250);
+        });
+
+        document.addEventListener('click', function (e) {
+            if (!lista.contains(e.target) && e.target !== input) ocultar();
+        });
+        input.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') ocultar();
+        });
+    })();
+</script>

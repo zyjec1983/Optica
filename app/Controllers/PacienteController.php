@@ -47,6 +47,19 @@ final class PacienteController extends Controller
         ]);
     }
 
+    /**
+     * Endpoint JSON: devuelve las coincidencias de pacientes para el
+     * autocompletado del cuadro de búsqueda (nombre, cédula o teléfono).
+     */
+    public function buscar(Request $request): void
+    {
+        $q = trim((string)$request->get('q'));
+        $results = $q !== '' ? $this->servicio->buscar($q, 10) : [];
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode($results, JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
     public function store(Request $request): void
     {
         if (!verify_csrf()) {
@@ -59,10 +72,12 @@ final class PacienteController extends Controller
             'apellido_paterno' => 'required|max:60',
             'primer_nombre'    => 'required|max:60',
             'fecha_nacimiento' => 'required|date',
+            'telefono'         => 'required|min:7|max:20',
             'email'            => 'email|max:100',
         ]);
 
         $errors = $this->validarIdentificacionEcuador($request, $errors);
+        $errors = $this->validarTelefono($request, $errors);
         if ($errors) {
             $this->fail($errors);
         }
@@ -114,10 +129,12 @@ final class PacienteController extends Controller
             'apellido_paterno' => 'required|max:60',
             'primer_nombre'    => 'required|max:60',
             'fecha_nacimiento' => 'required|date',
+            'telefono'         => 'required|min:7|max:20',
             'email'            => 'email|max:100',
         ]);
 
         $errors = $this->validarIdentificacionEcuador($request, $errors);
+        $errors = $this->validarTelefono($request, $errors);
         if ($errors) {
             $this->fail($errors);
         }
@@ -177,6 +194,20 @@ final class PacienteController extends Controller
             }
         }
 
+        return $errors;
+    }
+
+    /**
+     * Valida que el teléfono contenga entre 7 y 15 dígitos (admite signos,
+     * espacios y el prefijo internacional). El celular es obligatorio porque
+     * se usa para notificar al paciente vía WhatsApp cuando sus lentes están listos.
+     */
+    private function validarTelefono(Request $request, array $errors): array
+    {
+        $digitos = strlen(preg_replace('/\D/', '', (string)$request->post('telefono')));
+        if ($digitos < 7 || $digitos > 15) {
+            $errors['telefono'][] = 'Ingrese un número de celular válido (7 a 15 dígitos).';
+        }
         return $errors;
     }
 }

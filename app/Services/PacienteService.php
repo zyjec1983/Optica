@@ -32,6 +32,14 @@ final class PacienteService
         return $this->pacientes->findAll($search);
     }
 
+    /**
+     * Coincidencias rápidas para el autocompletado del cuadro de búsqueda.
+     */
+    public function buscar(string $q, int $limit = 10): array
+    {
+        return $this->pacientes->buscar($q, $limit);
+    }
+
     public function find(int $id): ?Paciente
     {
         return $this->pacientes->findById($id);

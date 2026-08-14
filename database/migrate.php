@@ -114,6 +114,26 @@ $queries = [
         CONSTRAINT fk_examen_usuario FOREIGN KEY (user_id)
             REFERENCES users (id) ON DELETE SET NULL
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4',
+
+    // ===== recordatorios (aviso de lentes listos vía WhatsApp) =====
+    'CREATE TABLE IF NOT EXISTS recordatorios (
+        id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        examen_id INT UNSIGNED NULL,
+        paciente_id INT UNSIGNED NOT NULL,
+        mensaje TEXT,
+        estado ENUM("pendiente","enviado") NOT NULL DEFAULT "pendiente",
+        fecha_recordatorio DATE NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        deleted_at TIMESTAMP NULL DEFAULT NULL,
+        KEY idx_rec_paciente (paciente_id),
+        KEY idx_rec_estado (estado),
+        KEY idx_rec_examen (examen_id),
+        CONSTRAINT fk_rec_paciente FOREIGN KEY (paciente_id)
+            REFERENCES pacientes (id) ON DELETE CASCADE,
+        CONSTRAINT fk_rec_examen FOREIGN KEY (examen_id)
+            REFERENCES examenes (id) ON DELETE SET NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4',
 ];
 
 foreach ($queries as $sql) {

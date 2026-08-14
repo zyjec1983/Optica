@@ -10,7 +10,7 @@
 
 /** @var array $examenes */
 /** @var int $pacienteId */
-/** @var array $pacientes */
+/** @var \App\Models\Paciente|null $pacienteSel */
 ?>
 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
     <h2 class="fw-bold mb-0"><i class="bi bi-eyedropper me-2"></i>Exámenes</h2>
@@ -20,26 +20,40 @@
 </div>
 
 <div class="card card-custom p-4 mb-4">
-    <form method="get" action="<?= e(app_url('/examenes')) ?>" class="row g-2 align-items-end">
-        <div class="col-12 col-md-8">
-            <label class="form-label">Paciente</label>
-            <select name="paciente_id" class="form-select" onchange="this.form.submit()">
-                <option value="">Todos los pacientes</option>
-                <?php foreach ($pacientes as $p):
-                    $nombre = trim(($p['primer_nombre'] ?? '') . ' ' . ($p['segundo_nombre'] ?? '')
-                        . ' ' . ($p['apellido_paterno'] ?? '') . ' ' . ($p['apellido_materno'] ?? ''));
-                    ?>
-                    <option value="<?= (int)$p['id'] ?>" <?= $pacienteId === (int)$p['id'] ? 'selected' : '' ?>>
-                        <?= e(trim($nombre . ' — ' . ($p['identificacion'] ?? ''))) ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
-        </div>
-        <div class="col-12 col-md-4 d-grid">
-            <button class="btn btn-secondary"><i class="bi bi-search me-1"></i> Filtrar</button>
-        </div>
-    </form>
+    <label class="form-label fw-semibold">Buscar paciente</label>
+    <div class="position-relative">
+        <input type="text" id="buscarPacienteLista" class="form-control form-control-lg"
+               placeholder="Escriba cédula, nombres o apellidos... ej: Christian, Rodriguez, 0920018736"
+               value="<?= $pacienteSel ? e(trim($pacienteSel->nombreCompleto() . ' — ' . $pacienteSel->identificacion)) : '' ?>"
+               autocomplete="off" minlength="2">
+        <div class="list-group position-absolute w-100 shadow" id="coincidenciasExamenes" style="z-index:1030; display:none;"></div>
+    </div>
+    <div class="form-text" id="coincidenciasInfoExamenes"></div>
 </div>
+
+<?php if ($pacienteSel !== null): ?>
+<div class="card card-custom p-4 mb-4 border-start border-4 border-primary">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <div>
+            <h5 class="mb-1"><i class="bi bi-person-vcard me-2"></i><?= e($pacienteSel->nombreCompleto()) ?></h5>
+            <div class="text-muted">
+                <span class="badge bg-light text-dark border"><?= e($pacienteSel->identificacion) ?></span>
+                <?php if ($pacienteSel->telefono !== ''): ?>
+                    <span class="badge bg-light text-dark border"><i class="bi bi-telephone"></i> <?= e($pacienteSel->telefono) ?></span>
+                <?php endif; ?>
+                <span class="badge bg-light text-dark border"><?= e(format_edad($pacienteSel->fecha_nacimiento)) ?></span>
+            </div>
+            <div class="mt-2"><span class="badge bg-primary">Historial de exámenes</span></div>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="<?= e(app_url('/examenes/nuevo?paciente_id=' . $pacienteSel->id)) ?>" class="btn btn-primary">
+                <i class="bi bi-plus-lg me-1"></i> Nuevo examen
+            </a>
+            <a href="<?= e(app_url('/examenes')) ?>" class="btn btn-outline-secondary">Ver todos</a>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
 
 <div class="card card-custom p-4">
     <div class="table-responsive">
@@ -93,3 +107,16 @@
         </table>
     </div>
 </div>
+
+<script src="<?= e(app_url('/assets/js/paciente-buscador.js')) ?>"></script>
+<script>
+    PacienteBuscador.init({
+        input: '#buscarPacienteLista',
+        lista: '#coincidenciasExamenes',
+        info: '#coincidenciasInfoExamenes',
+        url: <?= json_encode(app_url('/pacientes/buscar')) ?>,
+        onSelect: function (p) {
+            window.location.href = <?= json_encode(app_url('/examenes')) ?> + '?paciente_id=' + p.id;
+        }
+    });
+</script>

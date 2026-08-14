@@ -92,8 +92,9 @@ $repTelefono   = $pv('rep_telefono', $paciente->rep_telefono);
             </div>
 
             <div class="col-md-6">
-                <label>Teléfono</label>
-                <input class="form-control" name="telefono" value="<?= e($tel) ?>" placeholder="0999999999">
+                <label>Teléfono / celular</label>
+                <input class="form-control" name="telefono" value="<?= e($tel) ?>" placeholder="0999999999" required>
+                <div class="form-text">El celular es obligatorio: se usa para notificar vía WhatsApp.</div>
             </div>
             <div class="col-md-6">
                 <label>Correo electrónico</label>

@@ -44,9 +44,9 @@ final class CitaController extends Controller
     public function create(): void
     {
         $this->viewWithLayout('layouts/app', 'citas/form', [
-            'cita'     => new Cita(),
-            'esEdicion' => false,
-            'pacientes' => $this->servicio->pacientesParaSelector(),
+            'cita'        => new Cita(),
+            'esEdicion'   => false,
+            'pacienteSel' => null,
         ]);
     }
 
@@ -77,9 +77,9 @@ final class CitaController extends Controller
         }
 
         $this->viewWithLayout('layouts/app', 'citas/form', [
-            'cita'      => $cita,
-            'esEdicion' => true,
-            'pacientes' => $this->servicio->pacientesParaSelector(),
+            'cita'        => $cita,
+            'esEdicion'   => true,
+            'pacienteSel' => $this->servicio->paciente((int)$cita->paciente_id),
         ]);
     }
 

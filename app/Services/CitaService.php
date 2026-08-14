@@ -38,6 +38,11 @@ final class CitaService
         return $this->citas->findById($id);
     }
 
+    public function paciente(int $id): ?Paciente
+    {
+        return $this->pacientes->findById($id);
+    }
+
     public function pacientesParaSelector(): array
     {
         return $this->pacientes->findAll();

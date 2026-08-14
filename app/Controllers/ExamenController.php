@@ -14,6 +14,7 @@ namespace App\Controllers;
 
 use App\Services\AuthService;
 use App\Services\ExamenService;
+use App\Services\RecordatorioService;
 use core\Controller;
 use core\Request;
 use RuntimeException;
@@ -28,7 +29,8 @@ use RuntimeException;
 final class ExamenController extends Controller
 {
     public function __construct(
-        private readonly ExamenService $servicio = new ExamenService()
+        private readonly ExamenService $servicio = new ExamenService(),
+        private readonly RecordatorioService $recordatorios = new RecordatorioService()
     ) {
     }
 
@@ -41,9 +43,9 @@ final class ExamenController extends Controller
         $pacienteId = (int)$request->get('paciente_id', 0);
 
         $this->viewWithLayout('layouts/app', 'examenes/index', [
-            'examenes'   => $this->servicio->list($pacienteId > 0 ? $pacienteId : null),
-            'pacienteId' => $pacienteId,
-            'pacientes'  => $this->servicio->pacientesParaSelector(),
+            'examenes'    => $this->servicio->list($pacienteId > 0 ? $pacienteId : null),
+            'pacienteId'  => $pacienteId,
+            'pacienteSel' => $pacienteId > 0 ? $this->servicio->paciente($pacienteId) : null,
         ]);
     }
 
@@ -52,11 +54,12 @@ final class ExamenController extends Controller
      */
     public function create(Request $request): void
     {
+        $pacienteId = (int)$request->get('paciente_id', 0);
         $this->viewWithLayout('layouts/app', 'examenes/form', [
-            'examen'    => new \App\Models\Examen(),
-            'esEdicion' => false,
-            'pacientes' => $this->servicio->pacientesParaSelector(),
-            'pacienteId' => (int)$request->get('paciente_id', 0),
+            'examen'      => new \App\Models\Examen(),
+            'esEdicion'   => false,
+            'pacienteSel' => $pacienteId > 0 ? $this->servicio->paciente($pacienteId) : null,
+            'pacienteId'  => $pacienteId,
         ]);
     }
 
@@ -71,6 +74,12 @@ final class ExamenController extends Controller
             $user = AuthService::user();
             $userId = ($user['id'] ?? null) !== null ? (int)$user['id'] : null;
             $id = $this->servicio->registrar($request->all(), $userId);
+
+            // Recordatorio de "lentes listos" (notificación por WhatsApp en el panel).
+            if (!empty($request->post('recordatorio_lentes'))) {
+                $this->recordatorios->crearParaExamen((int)$request->post('paciente_id'), $id);
+            }
+
             session_flash('success', 'Examen registrado correctamente.');
             redirect(app_url('/examenes/' . $id));
         } catch (RuntimeException $ex) {
@@ -102,10 +111,10 @@ final class ExamenController extends Controller
             abort(404);
         }
         $this->viewWithLayout('layouts/app', 'examenes/form', [
-            'examen'    => $examen,
-            'esEdicion' => true,
-            'pacientes' => $this->servicio->pacientesParaSelector(),
-            'pacienteId' => (int)$examen->paciente_id,
+            'examen'      => $examen,
+            'esEdicion'   => true,
+            'pacienteSel' => $this->servicio->paciente((int)$examen->paciente_id),
+            'pacienteId'  => (int)$examen->paciente_id,
         ]);
     }
 

@@ -11,9 +11,10 @@
 
 /** @var \App\Models\Cita $cita */
 /** @var bool $esEdicion */
-/** @var array $pacientes */
+/** @var \App\Models\Paciente|null $pacienteSel */
 $pv = fn(string $key, string $fallback = '') => old($key, $fallback);
 $pacienteId = (int)$pv('paciente_id', (string)($cita->paciente_id ?? ''));
+$pacSelNombre = $pacienteSel !== null ? trim($pacienteSel->nombreCompleto() . ' — ' . $pacienteSel->identificacion) : '';
 $fecha = $pv('fecha', (string)$cita->fecha);
 $hora = $pv('hora', $cita->hora !== '' ? date('H:i', strtotime($cita->hora)) : '');
 $motivo = $pv('motivo', $cita->motivo);
@@ -33,18 +34,15 @@ $estado = $pv('estado', $cita->estado);
         <?= csrf_field() ?>
 
         <div class="mb-3">
-            <label class="fw-semibold">Paciente</label>
-            <select name="paciente_id" class="form-select" required>
-                <option value="">— Seleccione un paciente —</option>
-                <?php foreach ($pacientes as $p):
-                    $nombre = trim(($p['primer_nombre'] ?? '') . ' ' . ($p['segundo_nombre'] ?? '')
-                        . ' ' . ($p['apellido_paterno'] ?? '') . ' ' . ($p['apellido_materno'] ?? ''));
-                    ?>
-                    <option value="<?= (int)$p['id'] ?>" <?= $pacienteId === (int)$p['id'] ? 'selected' : '' ?>>
-                        <?= e(trim($nombre . ' — ' . ($p['identificacion'] ?? ''))) ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
+            <label class="fw-semibold">Buscar paciente (cédula, nombres o apellidos)</label>
+            <div class="position-relative">
+                <input type="text" id="buscarPacienteCita" class="form-control" required
+                       placeholder="Escriba la cédula o el nombre del paciente..."
+                       value="<?= e($pacSelNombre) ?>" autocomplete="off" minlength="2">
+                <input type="hidden" name="paciente_id" id="pacienteIdCita" value="<?= (int)$pacienteId ?>">
+                <div class="list-group position-absolute w-100 shadow" id="coincidenciasCita" style="z-index:1030; display:none;"></div>
+            </div>
+            <div class="form-text" id="coincidenciasInfoCita"></div>
             <div class="form-text">¿El paciente no existe? <a href="<?= e(app_url('/pacientes/nuevo')) ?>">Regístrelo aquí</a>.</div>
         </div>
 
@@ -89,3 +87,14 @@ $estado = $pv('estado', $cita->estado);
         </div>
     </form>
 </div>
+
+<script src="<?= e(app_url('/assets/js/paciente-buscador.js')) ?>"></script>
+<script>
+    PacienteBuscador.init({
+        input: '#buscarPacienteCita',
+        hidden: '#pacienteIdCita',
+        lista: '#coincidenciasCita',
+        info: '#coincidenciasInfoCita',
+        url: <?= json_encode(app_url('/pacientes/buscar')) ?>
+    });
+</script>

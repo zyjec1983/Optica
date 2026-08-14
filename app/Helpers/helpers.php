@@ -250,3 +250,36 @@ if (!function_exists('validar_cedula_ecuador')) {
         return $verificador === (int)$cedula[9];
     }
 }
+
+if (!function_exists('whatsapp_numero')) {
+    /**
+     * Normaliza un número local ecuatoriano a formato internacional
+     * para wa.me: "0999999999" => "593999999999".
+     */
+    function whatsapp_numero(string $telefono): string
+    {
+        $d = preg_replace('/\D/', '', $telefono);
+        if ($d === '') {
+            return '';
+        }
+        if (str_starts_with($d, '0')) {
+            return '593' . substr($d, 1);
+        }
+        return $d;
+    }
+}
+
+if (!function_exists('whatsapp_link')) {
+    /**
+     * Enlace wa.me con mensaje predefinido. Devuelve '' si el teléfono
+     * es inválido (menos de 7 dígitos).
+     */
+    function whatsapp_link(string $telefono, string $mensaje): string
+    {
+        $numero = whatsapp_numero($telefono);
+        if (strlen($numero) < 7) {
+            return '';
+        }
+        return 'https://wa.me/' . $numero . '?text=' . rawurlencode($mensaje);
+    }
+}

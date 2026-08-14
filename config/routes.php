@@ -20,7 +20,8 @@ use App\Controllers\{
     PerfilController,
     UserController,
     CitaController,
-    ExamenController
+    ExamenController,
+    RecordatorioController
 };
 
 $router = new Router();
@@ -48,6 +49,7 @@ $router->get('/dashboard', [DashboardController::class, 'index'], ['auth']);
 
 // ===== Pacientes =====
 $router->get('/pacientes', [PacienteController::class, 'index'], ['auth']);
+$router->get('/pacientes/buscar', [PacienteController::class, 'buscar'], ['auth']);
 $router->get('/pacientes/nuevo', [PacienteController::class, 'create'], ['auth']);
 $router->post('/pacientes', [PacienteController::class, 'store'], ['auth']);
 $router->get('/pacientes/editar/{id}', [PacienteController::class, 'edit'], ['auth']);
@@ -71,3 +73,6 @@ $router->get('/examenes/editar/{id}', [ExamenController::class, 'edit'], ['auth'
 $router->post('/examenes/editar/{id}', [ExamenController::class, 'update'], ['auth']);
 $router->get('/examenes/{id}', [ExamenController::class, 'show'], ['auth']);
 $router->post('/examenes/eliminar/{id}', [ExamenController::class, 'destroy'], ['auth']);
+
+// ===== Recordatorios (aviso de lentes listos) =====
+$router->post('/recordatorios/marcar/{id}', [RecordatorioController::class, 'marcar'], ['auth']);

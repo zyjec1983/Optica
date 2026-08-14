@@ -30,14 +30,42 @@ final class PacienteRepository
         $params = [];
         if ($search !== '') {
             $sql .= ' AND (p.identificacion LIKE :search1
-                      OR CONCAT(p.primer_nombre, " ", p.segundo_nombre, " ", p.apellido_paterno, " ", p.apellido_materno) LIKE :search2)';
+                      OR CONCAT(p.primer_nombre, " ", p.segundo_nombre, " ", p.apellido_paterno, " ", p.apellido_materno) LIKE :search2
+                      OR p.telefono LIKE :search3)';
             $params['search1'] = '%' . $search . '%';
             $params['search2'] = '%' . $search . '%';
+            $params['search3'] = '%' . $search . '%';
         }
         $sql .= ' ORDER BY p.id DESC';
 
         $stmt = Database::connection()->prepare($sql);
         $stmt->execute($params);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Búsqueda ligera para el autocompletado del cuadro de búsqueda
+     * (endpoint JSON): por nombre, identificación o teléfono, con límite.
+     */
+    public function buscar(string $q, int $limit = 10): array
+    {
+        $sql = 'SELECT p.id, p.tipo_identificacion, p.identificacion, p.apellido_paterno, p.apellido_materno,
+                       p.primer_nombre, p.segundo_nombre, p.fecha_nacimiento, p.telefono, p.email,
+                       r.nombres AS rep_nombres, r.parentesco AS rep_parentesco
+                FROM pacientes p
+                LEFT JOIN representantes r ON r.id = p.representante_id
+                WHERE p.deleted_at IS NULL
+                  AND (p.identificacion LIKE :s1
+                       OR CONCAT(p.primer_nombre, " ", p.segundo_nombre, " ", p.apellido_paterno, " ", p.apellido_materno) LIKE :s2
+                       OR p.telefono LIKE :s3)
+                ORDER BY p.id DESC
+                LIMIT :lim';
+        $stmt = Database::connection()->prepare($sql);
+        $stmt->bindValue(':s1', '%' . $q . '%');
+        $stmt->bindValue(':s2', '%' . $q . '%');
+        $stmt->bindValue(':s3', '%' . $q . '%');
+        $stmt->bindValue(':lim', $limit, PDO::PARAM_INT);
+        $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 

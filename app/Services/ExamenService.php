@@ -46,6 +46,11 @@ final class ExamenService
         return $this->examenes->findById($id);
     }
 
+    public function paciente(int $id): ?\App\Models\Paciente
+    {
+        return $this->pacientes->findById($id);
+    }
+
     public function pacientesParaSelector(): array
     {
         return $this->pacientes->findAll();
