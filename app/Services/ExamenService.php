@@ -13,21 +13,25 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Models\Examen;
+use App\Models\PruebaExamen;
 use App\Repositories\ExamenRepository;
 use App\Repositories\PacienteRepository;
+use App\Repositories\PruebaExamenRepository;
 use RuntimeException;
 
 /**
  * Servicio de exámenes visuales.
  *
  * Valida los datos de refracción (OD/OS, DP, ADD), la firma manuscrita
- * electrónica y delega la persistencia al repositorio.
+ * electrónica, las pruebas complementarias de la consulta y delega la
+ * persistencia al repositorio.
  */
 final class ExamenService
 {
     public function __construct(
         private readonly ExamenRepository $examenes = new ExamenRepository(),
-        private readonly PacienteRepository $pacientes = new PacienteRepository()
+        private readonly PacienteRepository $pacientes = new PacienteRepository(),
+        private readonly PruebaExamenRepository $pruebas = new PruebaExamenRepository()
     ) {
     }
 
@@ -43,7 +47,11 @@ final class ExamenService
 
     public function find(int $id): ?Examen
     {
-        return $this->examenes->findById($id);
+        $examen = $this->examenes->findById($id);
+        if ($examen !== null) {
+            $examen->pruebas = $this->pruebas->porExamen($id);
+        }
+        return $examen;
     }
 
     public function paciente(int $id): ?\App\Models\Paciente
@@ -63,7 +71,9 @@ final class ExamenService
     {
         $e = $this->validarYCompletar(new Examen(), $data, true);
         $e->user_id = $userId;
-        return $this->examenes->create($e);
+        $id = $this->examenes->create($e);
+        $this->guardarPruebas($id, $data['pruebas'] ?? []);
+        return $id;
     }
 
     /**
@@ -78,6 +88,7 @@ final class ExamenService
         $e = $this->validarYCompletar($examen, $data, false);
         $e->id = $id;
         $this->examenes->update($e);
+        $this->guardarPruebas($id, $data['pruebas'] ?? []);
     }
 
     public function eliminar(int $id): void
@@ -115,8 +126,8 @@ final class ExamenService
         $e->os_esfera = $this->validarRefraccion('OS esfera', $data['os_esfera'] ?? '', true);
         $e->os_cilindro = $this->validarRefraccion('OS cilindro', $data['os_cilindro'] ?? '', true);
         $e->os_eje = $this->validarEje('OS eje', $data['os_eje'] ?? '');
-        $e->dp = $this->validarRefraccion('DP', $data['dp'] ?? '', false);
-        $e->add_value = $this->validarRefraccion('ADD', $data['add_value'] ?? '', false);
+        $e->dp = $this->validarRefraccion('DP', $data['dp'] ?? '', true);
+        $e->add_value = $this->validarRefraccion('ADD', $data['add_value'] ?? '', true);
 
         $e->diagnostico = trim((string)($data['diagnostico'] ?? '')) !== ''
             ? trim((string)$data['diagnostico']) : null;
@@ -174,5 +185,38 @@ final class ExamenService
             throw new RuntimeException("El campo {$campo} debe ser un entero entre 0 y 180.");
         }
         return $valor;
+    }
+
+    /**
+     * Normaliza y persiste las pruebas complementarias de la consulta.
+     * Solo se guardan las que tienen al menos un valor; la refracción y
+     * el astigmatismo se conservan en las columnas del examen.
+     */
+    private function guardarPruebas(int $examenId, mixed $data): void
+    {
+        $data = is_array($data) ? $data : [];
+        $limpio = [];
+
+        foreach (PruebaExamen::PRUEBAS as $clave => $cfg) {
+            $raw = is_array($data[$clave] ?? null) ? $data[$clave] : [];
+            $item = [];
+
+            foreach (['od', 'os', 'resultado'] as $campo) {
+                $v = trim((string)($raw[$campo] ?? ''));
+                if ($v !== '') {
+                    $item[$campo] = $v;
+                }
+            }
+
+            if (isset($raw['normal']) && $raw['normal'] !== '') {
+                $item['normal'] = (string)$raw['normal'] === '1' ? 1 : 0;
+            }
+
+            if ($item !== []) {
+                $limpio[$clave] = $item;
+            }
+        }
+
+        $this->pruebas->reemplazar($examenId, $limpio);
     }
 }

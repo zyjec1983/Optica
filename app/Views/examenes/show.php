@@ -97,3 +97,53 @@ $fmtRef = function (?string $esf, ?string $cil, ?string $eje): string {
         </div>
     </div>
 </div>
+
+<?php
+$pruebas = $examen->pruebas ?? [];
+$pruebasMostrar = [];
+foreach (\App\Models\PruebaExamen::PRUEBAS as $clave => $cfg) {
+    $p = $pruebas[$clave] ?? null;
+    if ($p === null) {
+        continue;
+    }
+    if ($p->od === null && $p->os === null && $p->resultado === null && $p->normal === null) {
+        continue;
+    }
+    $pruebasMostrar[$clave] = $p;
+}
+?>
+<?php if (count($pruebasMostrar) > 0): ?>
+<div class="row g-3 mt-0">
+    <div class="col-12">
+        <div class="card card-custom p-4">
+            <h6 class="fw-bold text-muted mb-3"><i class="bi bi-clipboard2-check me-2"></i>Pruebas de la consulta</h6>
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead>
+                    <tr><th>Prueba</th><th>OD · Derecho</th><th>OS · Izquierdo</th><th>Resultado</th><th>Estado</th></tr>
+                    </thead>
+                    <tbody>
+                    <?php foreach ($pruebasMostrar as $clave => $p):
+                        $tipo = \App\Models\PruebaExamen::PRUEBAS[$clave]['tipo'] ?? 'simple';
+                        ?>
+                        <tr>
+                            <td class="fw-semibold"><?= e(\App\Models\PruebaExamen::PRUEBAS[$clave]['label']) ?></td>
+                            <td><?= $tipo === 'ojos' ? e($p->od ?: '—') : '—' ?></td>
+                            <td><?= $tipo === 'ojos' ? e($p->os ?: '—') : '—' ?></td>
+                            <td><?= $tipo === 'simple' ? e($p->resultado ?: '—') : '—' ?></td>
+                            <td>
+                                <?php if ($p->normal === null): ?>
+                                    <span class="text-muted">—</span>
+                                <?php else: ?>
+                                    <span class="badge <?= $p->normal ? 'bg-success' : 'bg-danger' ?>"><?= e($p->normalLabel()) ?></span>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<?php endif; ?>

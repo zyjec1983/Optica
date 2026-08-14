@@ -134,6 +134,23 @@ $queries = [
         CONSTRAINT fk_rec_examen FOREIGN KEY (examen_id)
             REFERENCES examenes (id) ON DELETE SET NULL
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4',
+
+    // ===== pruebas complementarias de la consulta =====
+    'CREATE TABLE IF NOT EXISTS pruebas_examen (
+        id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        examen_id INT UNSIGNED NOT NULL,
+        prueba VARCHAR(50) NOT NULL,
+        od VARCHAR(20) DEFAULT NULL,
+        os VARCHAR(20) DEFAULT NULL,
+        resultado VARCHAR(50) DEFAULT NULL,
+        normal TINYINT(1) DEFAULT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        deleted_at TIMESTAMP NULL DEFAULT NULL,
+        KEY idx_prueba_examen (examen_id),
+        CONSTRAINT fk_prueba_examen FOREIGN KEY (examen_id)
+            REFERENCES examenes (id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4',
 ];
 
 foreach ($queries as $sql) {

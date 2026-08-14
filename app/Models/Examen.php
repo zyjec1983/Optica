@@ -50,6 +50,13 @@ final class Examen
     public string $paciente_telefono = '';
 
     /**
+     * Pruebas complementarias de la consulta, indexadas por clave:
+     * array<string, PruebaExamen> (agudeza_visual, visión de cerca/lejos,
+     * binocular, movimientos, color, contraste, presión intraocular, campo).
+     */
+    public array $pruebas = [];
+
+    /**
      * Crea una instancia a partir de una fila de la base de datos.
      */
     public static function fromRow(array $row): self

@@ -15,6 +15,22 @@
 $pv = fn(string $key, string $fallback = '') => old($key, $fallback);
 $pacId = (int)$pv('paciente_id', (string)($pacienteId > 0 ? $pacienteId : ($examen->paciente_id ?? '')));
 $pacSelNombre = $pacienteSel !== null ? trim($pacienteSel->nombreCompleto() . ' — ' . $pacienteSel->identificacion) : '';
+// Valor de una prueba complementaria (vuelve de old() o de la entidad).
+$pruebaVal = function (string $clave, string $campo) use ($examen): string {
+    $old = $_SESSION['_old']['pruebas'][$clave][$campo] ?? null;
+    if ($old !== null && $old !== '') {
+        return (string)$old;
+    }
+    $p = $examen->pruebas[$clave] ?? null;
+    if ($p === null) {
+        return '';
+    }
+    $v = $p->{$campo} ?? null;
+    if ($v === null) {
+        return '';
+    }
+    return $campo === 'normal' ? ($v ? '1' : '0') : (string)$v;
+};
 $fecha = $pv('fecha_examen', (string)$examen->fecha_examen);
 $odE = $pv('od_esfera', (string)$examen->od_esfera);
 $odC = $pv('od_cilindro', (string)$examen->od_cilindro);
@@ -124,6 +140,58 @@ $firmaRep = $examen->firma_representante;
                 <input type="text" class="form-control" name="add_value" value="<?= e($add) ?>" placeholder="+2.00" inputmode="decimal">
             </div>
         </div>
+    </div>
+
+    <div class="card card-custom p-4 mb-4">
+        <h6 class="fw-bold text-muted mb-3">
+            <i class="bi bi-clipboard2-check me-2"></i>Pruebas de la consulta
+        </h6>
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                <tr>
+                    <th>Prueba</th>
+                    <th style="width:120px">OD · Derecho</th>
+                    <th style="width:120px">OS · Izquierdo</th>
+                    <th style="width:170px">Resultado</th>
+                    <th style="width:150px">Estado</th>
+                </tr>
+                </thead>
+                <tbody>
+                <?php foreach (\App\Models\PruebaExamen::PRUEBAS as $clave => $cfg): ?>
+                    <tr>
+                        <td class="fw-semibold"><?= e($cfg['label']) ?></td>
+                        <?php if ($cfg['tipo'] === 'ojos'): ?>
+                            <td>
+                                <input class="form-control form-control-sm" name="pruebas[<?= e($clave) ?>][od]"
+                                       value="<?= e($pruebaVal($clave, 'od')) ?>" placeholder="<?= e($cfg['placeholder']) ?>">
+                            </td>
+                            <td>
+                                <input class="form-control form-control-sm" name="pruebas[<?= e($clave) ?>][os]"
+                                       value="<?= e($pruebaVal($clave, 'os')) ?>" placeholder="<?= e($cfg['placeholder']) ?>">
+                            </td>
+                            <td></td>
+                        <?php else: ?>
+                            <td></td>
+                            <td></td>
+                            <td>
+                                <input class="form-control form-control-sm" name="pruebas[<?= e($clave) ?>][resultado]"
+                                       value="<?= e($pruebaVal($clave, 'resultado')) ?>" placeholder="<?= e($cfg['placeholder']) ?>">
+                            </td>
+                        <?php endif; ?>
+                        <td>
+                            <select class="form-select form-select-sm" name="pruebas[<?= e($clave) ?>][normal]">
+                                <option value="">—</option>
+                                <option value="1" <?= $pruebaVal($clave, 'normal') === '1' ? 'selected' : '' ?>>Normal</option>
+                                <option value="0" <?= $pruebaVal($clave, 'normal') === '0' ? 'selected' : '' ?>>Anormal</option>
+                            </select>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+        <div class="form-text">Refracción y astigmatismo se registran en la sección anterior (OD/OS: esfera, cilindro y eje).</div>
     </div>
 
     <div class="card card-custom p-4 mb-4">
@@ -243,11 +311,48 @@ $firmaRep = $examen->firma_representante;
             firmaData.value = '';
         });
 
-        // Validación al enviar: la firma es obligatoria.
-        document.getElementById('examenForm').addEventListener('submit', function (e) {
+        // Validación al enviar: paciente, fecha y firma son obligatorios.
+        // Se desactiva la validación nativa del navegador para mostrar un
+        // toast único y hacer scroll al primer campo que falte.
+        const form = document.getElementById('examenForm');
+        form.setAttribute('novalidate', '');
+        form.addEventListener('submit', function (e) {
+            const fallos = [];
+
+            const pacHidden = document.getElementById('pacienteIdForm');
+            const pacSearch = document.getElementById('buscarPacienteForm');
+            if (!pacHidden.value || parseInt(pacHidden.value, 10) <= 0) {
+                fallos.push({ el: pacSearch, msg: 'Seleccione un paciente válido de la lista.' });
+            }
+
+            const fechaInput = form.querySelector('input[name="fecha_examen"]');
+            if (!fechaInput.value) {
+                fallos.push({ el: fechaInput, msg: 'La fecha del examen es obligatoria.' });
+            }
+
             if (!firmaData.value) {
+                fallos.push({ el: canvas, msg: 'Debe capturar la firma del paciente o representante.' });
+            }
+
+            if (fallos.length > 0) {
                 e.preventDefault();
-                firmaError.textContent = 'Debe capturar la firma del paciente o representante.';
+                const primero = fallos[0];
+                primero.el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                primero.el.focus({ preventScroll: true });
+                primero.el.classList.add('is-invalid');
+                setTimeout(() => primero.el.classList.remove('is-invalid'), 3500);
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'error',
+                        title: primero.msg,
+                        timer: 4000,
+                        showConfirmButton: false
+                    });
+                } else {
+                    alert(primero.msg);
+                }
             }
         });
     })();
