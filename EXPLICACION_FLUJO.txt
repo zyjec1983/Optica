@@ -1,0 +1,216 @@
+SISTEMA DE GESTION PARA OPTICA
+EXPLICACION DEL FLUJO DE LA APLICACION (para aprender el codigo)
+===============================================================
+
+Actualizado: 2026-08-13
+
+Este archivo explica COMO funciona el sistema por dentro, paso a paso y
+en lenguaje sencillo. El codigo no es "avanzado por molestar": sigue una
+arquitectura en capas, y una vez que entiendes UNA funcion (ej. login),
+entendiste TODAS. Todo lo demas es variacion de lo mismo.
+
+---------------------------------------------------------
+1. LA IDEA PRINCIPAL: CAPAS
+---------------------------------------------------------
+El sistema tiene 4 "pisos" que siempre se usan en el mismo orden:
+
+   Navegador (lo que ve el usuario)
+        |
+        v
+   1. RUTAS (config/routes.php)  -> "quien atiende esta URL?"
+        |
+        v
+   2. CONTROLADOR (app/Controllers) -> "que debo hacer?"
+        |
+        v
+   3. SERVICIO (app/Services) -> "cuales son las reglas de negocio?"
+        |
+        v
+   4. REPOSITORIO (app/Repositories) -> "habla con la base de datos"
+        |
+        v
+   MySQL (base de datos)
+
+Y de vuelta, la vista (app/Views) es la que "pinta" el HTML.
+
+Regla de oro: CADA CAPA solo llama a la que esta debajo.
+El Controlador NUNCA consulta la base de datos directamente; le pide al
+Servicio, y el Servicio al Repositorio. Si rompes ese orden, el codigo
+se vuelve un enredo imposible de mantener. Por eso se cuida tanto.
+
+Analogia: un restaurante.
+  - El Cliente (navegador) pide al Mesero (rutas+controlador).
+  - El Mesero lleva el pedido al Cocinero (servicio): "pizza sin queso".
+  - El Cocinero saca ingredientes de la Bodega (repositorio).
+  - La Bodega (MySQL) guarda la harina y los tomates.
+
+---------------------------------------------------------
+2. EL FLUJO COMPLETO DE CUALQUIER PETICION
+---------------------------------------------------------
+Cada vez que el navegador pide una URL, pasa esto (ver
+public/index.php, son solo 37 lineas):
+
+  a) index.php carga el "composer autoload" (los nombres de las clases
+     ya saben donde estan por el archivo composer.json, PSR-4).
+  b) Carga config/app.php (lee el .env: base de datos, debug, etc.).
+  c) Session::start() -> enciende la sesion (PHP $_SESSION).
+  d) Carga config/routes.php -> registra todas las rutas en el Router.
+  e) Crea un objeto Request (envuelve $_GET/$_POST con comodidad).
+  f) $router->dispatch(method, uri) -> busca la ruta que coincide con
+     la URL y el verbo (GET/POST).
+
+El Router (core/Router.php) hace magia barata pero util:
+  - Convierte rutas como /pacientes/editar/{id} en expresiones
+    regulares y captura el {id} para pasarselo al metodo.
+  - Con REFLECTION (ReflectionMethod) descubre que parametros pide el
+    metodo del controlador y le inyecta automaticamente un Request
+    si el tipo del parametro es core\Request. Por eso puedes escribir
+    "public function store(Request $request, int $id)" y el Router se
+    encarga de pasarte el request y el id, sin que hagas nada.
+  - Ejecuta los middleware de la ruta (por ejemplo 'auth' = debes
+    estar logueado, si no, te manda al login).
+
+---------------------------------------------------------
+3. FLUJO DEL LOGIN (el ejemplo basico)
+---------------------------------------------------------
+GET /login  ->  Router -> AuthController::showLogin()
+  - Si ya hay sesion, redirige a /. Si no, muestra app/Views/auth/login.php.
+
+POST /login (el usuario mando correo+clave)
+  AuthController::login(Request) hace en orden:
+   1. verify_csrf()   -> compara el _token oculto del formulario con el
+                          de la sesion (proteccion contra ataques CSRF).
+   2. revisa que email y password no esten vacios.
+   3. AuthService::attempt(email, password):
+      - UserRepository::findByEmail() -> SELECT ... WHERE email = ?
+        (PDO con marcadores de posicion, evita inyeccion SQL).
+      - password_verify() -> compara la clave con el hash guardado.
+      - Si coincide: Session::regenerate() (renueva el id de sesion,
+        anti robo de sesion) y guarda el usuario en $_SESSION['user'].
+   4. Si todo bien -> redirect('/'). Si falla -> session_flash('error',
+      'Credenciales incorrectas') y redirect('/login').
+
+"session_flash" guarda un mensaje en la sesion que SOLO se muestra una
+vez (en la vista de login sale el toast con SweetAlert2).
+
+Y en cada ruta protegida (ej. /dashboard con middleware 'auth'):
+  App\Middleware\AuthMiddleware::handle() revisa $_SESSION['user'];
+  si no existe, redirect('/login').
+
+---------------------------------------------------------
+4. FLUJO DE REGISTRAR UN PACIENTE
+---------------------------------------------------------
+GET /pacientes/nuevo -> PacienteController::create()
+  - Muestra app/Views/pacientes/form.php con un Paciente vacio.
+
+POST /pacientes -> PacienteController::store(Request)  (PacienteController.php:63)
+  1. verify_csrf() -> si el _token no coincide, error y redireccion.
+  2. $this->validate([...]) (core/Controller.php:36) -> valida con reglas
+     tipo 'required|min:5|max:20|email|date'. Devuelve array de errores.
+  3. validarIdentificacionEcuador() -> comprueba la cedula con el
+     algoritmo modulo 10 (la funcion validar_cedula_ecuador esta en
+     app/Helpers/helpers.php).
+  4. validarTelefono() -> exige entre 7 y 15 digitos (obligatorio para
+     WhatsApp).
+  5. Si hay errores -> $this->fail($errors): guarda _errors y _old en la
+     sesion y vuelve al formulario. El formulario muestra los errores y
+     repone los datos (por eso "no se pierde lo escrito").
+  6. $this->servicio->registrar($request->all()) -> PacienteService.php:53:
+     - PacienteRepository::findByIdentificacion() -> si ya existe esa
+       cedula, lanza RuntimeException('Ya existe un paciente...').
+     - fillPaciente() -> copia los datos del formulario al objeto Modelo
+       Paciente (los trim() a todo).
+     - Si el paciente es menor (esMenor() calcula la edad), guarda o
+       actualiza al representante en la tabla representantes.
+     - PacienteRepository::create($paciente) -> INSERT en la tabla
+       pacientes con PDO preparado. Devuelve el id nuevo.
+  7. session_flash('success', ...) -> toast verde.
+  8. redirect('/pacientes') -> vuelve al listado.
+
+OJO con el ORDEN de validacion: primero se valida en el Controlador (lo
+"formal", tipo required/email) y luego en el Servicio (las reglas de
+negocio, tipo "esa cedula ya existe"). Los dos estan protegidos por
+RuntimeException que el controlador captura con try/catch.
+
+---------------------------------------------------------
+5. FLUJO DE CREAR UN EXAMEN (el mas completo)
+---------------------------------------------------------
+GET /examenes/nuevo -> ExamenController::create()
+  - Muestra app/Views/examenes/form.php: buscador de paciente en vivo,
+    fecha, refraccion (OD/OS esfera, cilindro, eje), DP, ADD, las 9
+    pruebas de la consulta, diagnostico, observaciones, y el canvas de
+    firma manuscrita.
+
+POST /examenes -> ExamenController::store() (ExamenController.php:66)
+  1. verify_csrf().
+  2. ExamenService::registrar($request->all(), $userId) (ExamenService.php:70):
+     - validarYCompletar():
+       * El paciente debe existir (PacienteRepository::findById).
+       * La fecha debe ser valida.
+       * Refraccion: validarRefraccion() acepta numeros tipo -1.25 (con
+         signo y hasta 2 decimales) o vacio.
+       * DP y ADD: ahora OPCIONALES (se pasan con 'true').
+       * Diagnostico y observaciones: opcionales.
+       * Firma: debe llegar como data:image/png;base64,... (lo genera el
+         canvas). Si no llega y es un examen nuevo, error "Debe capturar
+         la firma del paciente o representante."
+     - ExamenRepository::create() -> INSERT en examenes.
+     - guardarPruebas() -> normaliza las pruebas que vinieron con algun
+       valor (las que estan vacias se ignoran) y llama a
+       PruebaExamenRepository::reemplazar() -> primero DELETE de las
+       pruebas de ese examen y luego INSERT de las nuevas (asi editar
+       simplemente reemplaza, sin duplicar).
+  3. Si marcaste "Crear recordatorio de lentes listos":
+     RecordatorioService::crearParaExamen() -> INSERT en recordatorios.
+  4. session_flash('success') y redirect('/examenes/{id}') -> el detalle.
+
+NOTA: la firma la genera el JavaScript del propio formulario
+(public/assets/js + script dentro de form.php): al dibujar en el canvas,
+en cada pointerup se hace firmaData.value = canvas.toDataURL('image/png')
+y se guarda en un input hidden llamado "firma". El servidor solo recibe
+ese string en base64 y lo guarda tal cual en la BD.
+
+---------------------------------------------------------
+6. FLUJO DE UNA CITA (repaso, es identico)
+---------------------------------------------------------
+POST /citas -> CitaController::store()
+  verify_csrf() -> validate() -> CitaService::registrar()
+  -> CitaRepository::create() -> flash success -> redirect('/citas').
+
+Ya ves: ES EL MISMO PATRON. Solo cambian los campos.
+
+---------------------------------------------------------
+7. GLOSARIO RAPIDO
+---------------------------------------------------------
+- Request (core/Request.php)   : envoltorio de $_GET/$_POST/$_FILES.
+- Session (core/Session.php)   : envoltorio de $_SESSION.
+- Router (core/Router.php)     : hace coincidir URL con metodo.
+- Controller (core/Controller.php): base con view(), validate(), fail(),
+                                    viewWithLayout().
+- Modelo (app/Models)          : "ficha" de un registro; SOLO datos y
+                                 calculos simples (ej. esMenor()).
+                                 NUNCA consulta la BD.
+- Repositorio (app/Repositories): TODO el SQL de una tabla.
+- Servicio (app/Services)      : reglas de negocio (validaciones de
+                                 negocio, orquestacion).
+- Middleware (app/Middleware)  : "portero" de una ruta (auth = estas
+                                 logueado?).
+- Helpers (app/Helpers)        : funciones sueltas reutilizables
+                                 (redirect, e(), csrf_field(), session_flash,
+                                 validar_cedula_ecuador, whatsapp_link()).
+- View (app/Views)             : HTML con PHP minimo (solo imprimir con e()).
+
+---------------------------------------------------------
+8. COMO LEER EL CODIGO NUEVO (metodo practico)
+---------------------------------------------------------
+Cuando quieras entender cualquier funcionalidad:
+  1. Mira la RUTA en config/routes.php (que verbo y que controlador).
+  2. Abre el CONTROLADOR y mira el metodo (store, update, index...).
+  3. Sigue la llamada al Servicio.
+  4. Sigue al Repositorio y mira el SQL.
+  5. Vuelve a la VISTA para ver como se muestra.
+Empieza por las funciones pequenas (un paciente) y sube de dificultad.
+
+Recuerda: no tienes que memorizar nada. Con saber "Controlador pide al
+Servicio, Servicio al Repositorio, Repositorio a MySQL" ya sabes el 90%
+del sistema. El resto es repetir ese patron.

@@ -1,0 +1,100 @@
+SISTEMA DE GESTION PARA OPTICA / CONSULTORIO OPTOMETRICO
+REGISTRO DE PROGRESO POR SPRINTS
+=========================================================
+
+Actualizado: 2026-08-13
+Rama: main
+Remoto: https://github.com/zyjec1983/Optica.git
+Ultimo commit: 8cceb14 (pusheado)
+
+Instruccion: antes de cada sesion revisar este archivo para saber que
+falta. Al terminar cada tarea marcar aqui lo realizado. Actualizar la
+fecha y el ultimo commit al cierre de cada sprint.
+
+---------------------------------------------------------
+ESTADO GENERAL
+---------------------------------------------------------
+Sprint 1  Base + BD + autenticacion + pacientes        [X] Completado
+Sprint 2  Examenes + historial + firma                 [X] Completado
+Sprint 3  Productos + servicios + proformas + inventario [ ] Pendiente (siguiente)
+Sprint 4  Ventas + abonos + ordenes                    [ ] Pendiente
+Sprint 5  Facturacion + documentos + migracion         [ ] Pendiente
+Sprint 6  Reportes + configuracion + pruebas + despliegue [ ] Pendiente
+
+---------------------------------------------------------
+SPRINT 1 - BASE + BD + AUTENTICACION + PACIENTES  [COMPLETADO]
+---------------------------------------------------------
+[X] Front Controller, Router, sesion y roles
+[X] Login / logout con roles (administrador, optometra, cajero)
+[X] CRUD de pacientes con validacion de cedula/RUC ecuatoriana
+[X] Extras anadidos (no estaban en la propuesta):
+    - Perfil con avatar y cambio de contrasena
+    - Gestion de usuarios (solo administrador)
+    - Agenda de citas (CRUD + estados)
+    - Buscador de pacientes en vivo (cedula/nombres/telefono)
+    - Celular obligatorio en pacientes
+    - Soft-delete: pacientes y examenes solo se marcan deleted_at
+    - Recordatorios de "lentes listos" con aviso por WhatsApp
+    - Seguridad: CSRF, XSS, confirmaciones con SweetAlert2
+
+---------------------------------------------------------
+SPRINT 2 - EXAMENES + HISTORIAL + FIRMA  [COMPLETADO]
+---------------------------------------------------------
+[X] Tabla examenes: OD/OS (esfera, cilindro, eje), DP, ADD,
+    diagnostico, observaciones, fecha
+[X] Modelo + Repositorio + Servicio + Controlador
+[X] Formulario de examen visual ligado a paciente (buscador en vivo)
+[X] Historial cronologico por paciente (/examenes?paciente_id=X)
+    (pendiente opcional: convertirlo en pestana dentro de la ficha)
+[X] Firma manuscrita electronica con Canvas (paciente o representante)
+[X] Vistas + rutas + verificacion HTTP
+[X] Extras anadidos (no estaban en la propuesta):
+    - 9 pruebas de la consulta en tabla normalizada (pruebas_examen):
+      agudeza visual, vision cercana, vision lejana, vision binocular,
+      movimientos oculares, vision del color, sensibilidad al contraste,
+      presion intraocular, campo visual
+    - DP y ADD opcionales (minimo obligatorio: paciente + fecha + firma)
+    - Feedback al guardar: toast + scroll al campo que falta
+
+---------------------------------------------------------
+SPRINT 3 - PRODUCTOS, SERVICIOS, PROFORMAS E INVENTARIO  [PENDIENTE]
+---------------------------------------------------------
+[ ] Catalogo de productos/servicios con categorias y precios
+[ ] Control basico de existencias: entradas, salidas, ajustes, stock bajo
+[ ] Proformas: agregar productos/servicios, descuentos, impuestos, totales
+[ ] Conversion de proforma a venta
+
+---------------------------------------------------------
+SPRINT 4 - VENTAS, ABONOS Y ORDENES DE TRABAJO  [PENDIENTE]
+---------------------------------------------------------
+[ ] Registro de venta con forma de pago (contado/credito)
+[ ] Abonos y anticipos con calculo automatico de saldo
+[ ] Recibos (historial de pagos)
+[ ] Ordenes de trabajo: datos del lente/armazon/tratamiento
+[ ] Estados de orden: pendiente -> produccion -> recibida -> lista ->
+    entregada -> cancelada, con fecha estimada de entrega
+
+---------------------------------------------------------
+SPRINT 5 - FACTURACION, DOCUMENTOS Y MIGRACION  [PENDIENTE]
+---------------------------------------------------------
+[ ] Facturacion electronica SRI (XML + certificado .p12 + respuesta)
+[ ] Generacion de PDF (A4 historial, A5 factura, ticket termico 80 mm)
+    con Dompdf
+[ ] Migracion de datos desde .docx (PHPWord) y PDF (PDFParser) con
+    deteccion de duplicados y vista previa
+[ ] Auditoria basica de acciones
+
+---------------------------------------------------------
+SPRINT 6 - REPORTES, CONFIGURACION Y DESPLIEGUE  [PENDIENTE]
+---------------------------------------------------------
+[ ] Dashboard ampliado (pacientes, examenes, ventas, ordenes pendientes)
+[ ] Reportes de ventas/abonos, ordenes por estado, inventario/stock bajo
+[ ] Configuracion: datos fiscales, logotipos, firma del profesional
+[ ] Pruebas, correcciones, capacitacion (2 h) y puesta en produccion
+
+---------------------------------------------------------
+PENDIENTES GENERALES / NOTAS
+---------------------------------------------------------
+- Actualizar README.md con los modulos nuevos (examenes, recordatorios)
+- Revisar la propuesta original (PDF) al iniciar cada sprint: el modelo
+  no puede leer el PDF directamente, transcribir el alcance si hace falta

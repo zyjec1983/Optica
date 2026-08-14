@@ -38,12 +38,35 @@ php database/seeds.php      # crea usuarios iniciales
 
 La aplicación se sirve desde `public/` (reescritura de Apache incluida).
 
+## Arquitectura
+
+Framework MVC propio (sin framework externo) con capas en orden fijo:
+
+```
+Navegador → public/index.php (Front Controller) → config/routes.php (Router)
+→ Middleware → Controller → Service → Repository → MySQL
+→ View (HTML)
+```
+
+- **Controller** (`app/Controllers`): recibe la petición, valida lo formal, delega.
+- **Service** (`app/Services`): reglas de negocio (validaciones de negocio, orquestación).
+- **Repository** (`app/Repositories`): todo el SQL de una tabla (PDO preparado).
+- **Model** (`app/Models`): datos y cálculos simples; nunca consulta la BD.
+- **View** (`app/Views`): HTML con solo `e()` para escapar la salida.
+- **Middleware** (`app/Middleware`): portero de rutas (ej. `auth`).
+
+Cada capa solo llama a la de abajo. Ver `EXPLICACION_FLUJO.txt` para el
+flujo detallado del login, pacientes y exámenes.
+
 ## Funcionalidades
 
 - Autenticación con roles (administrador, optómetra, cajero)
-- Dashboard
-- Gestión de pacientes (validación de cédula/RUC ecuatoriana)
+- Dashboard con recordatorios de "lentes listos" (WhatsApp)
+- Gestión de pacientes (validación de cédula/RUC, buscador en vivo, soft-delete)
 - Agenda de citas
+- Exámenes visuales con historial por paciente, firma manuscrita electrónica
+  y 9 pruebas de la consulta (tabla normalizada)
+- Recordatorios de lentes listos con aviso por WhatsApp
 - Gestión de usuarios con perfil, avatar y cambio de contraseña
 
 ## Credenciales iniciales
