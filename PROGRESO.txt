@@ -5,7 +5,7 @@ REGISTRO DE PROGRESO POR SPRINTS
 Actualizado: 2026-08-13
 Rama: main
 Remoto: https://github.com/zyjec1983/Optica.git
-Ultimo commit: 8cceb14 (pusheado)
+Ultimo commit: a31f1e6 (pusheado)
 
 Instruccion: antes de cada sesion revisar este archivo para saber que
 falta. Al terminar cada tarea marcar aqui lo realizado. Actualizar la
@@ -95,6 +95,12 @@ SPRINT 6 - REPORTES, CONFIGURACION Y DESPLIEGUE  [PENDIENTE]
 ---------------------------------------------------------
 PENDIENTES GENERALES / NOTAS
 ---------------------------------------------------------
-- Actualizar README.md con los modulos nuevos (examenes, recordatorios)
+- Grabar los avances en este archivo al cierre de cada sprint
+- Actualizar la fecha y el ultimo commit aqui cuando se haga push
+- Documentacion creada en commit a31f1e6: seccion Arquitectura en
+  README.md, EXPLICACION_FLUJO.txt (flujo login/pacientes/examenes) y
+  este PROGRESO.txt
+- FOLDER STRUCTURE.txt y generar_arbol.bat quedan fuera del repo (el
+  usuario decidio no incluirlos)
 - Revisar la propuesta original (PDF) al iniciar cada sprint: el modelo
   no puede leer el PDF directamente, transcribir el alcance si hace falta
